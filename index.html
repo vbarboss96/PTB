@@ -222,4 +222,70 @@
         document.getElementById('ing-preco').value = "R$ " + item.preco.toFixed(2).replace(".",",");
         document.getElementById('ing-qtd').value = item.qtd;
         document.getElementById('ing-unidade').value = item.unidade;
-        document.getElementById
+        document.getElementById('edit-index').value = i;
+        document.getElementById('btn-salvar').innerText = "💾 ATUALIZAR DADOS";
+        document.getElementById('btn-cancelar').style.display = "block";
+        window.scrollTo(0,0);
+    }
+
+    function cancelarEdicao() {
+        document.getElementById('titulo-form').innerText = "📦 Novo Ingrediente";
+        document.getElementById('ing-nome').value = "";
+        document.getElementById('ing-preco').value = "";
+        document.getElementById('ing-qtd').value = "";
+        document.getElementById('edit-index').value = "-1";
+        document.getElementById('btn-salvar').innerText = "💾 SALVAR INGREDIENTE";
+        document.getElementById('btn-cancelar').style.display = "none";
+    }
+
+    // Calculadora de Receitas
+    function addNaReceita() {
+        const idx = document.getElementById('drop-ingredientes').value;
+        const qtdUsada = parseFloat(document.getElementById('rec-qtd').value);
+        if(idx === "" || !qtdUsada) return alert("Selecione o item e a quantidade!");
+
+        const item = db[idx];
+        // Normalização básica de KG/L para gramas/ml
+        let baseQtd = item.qtd;
+        if(item.unidade === "Kg" || item.unidade === "L") baseQtd = item.qtd * 1000;
+
+        const subtotal = (item.preco / baseQtd) * qtdUsada;
+        receitaAtiva.push({ nome: item.nome, qtd: qtdUsada, unidade: (item.unidade.length > 1 ? "g/ml" : item.unidade), custo: subtotal });
+        
+        renderReceita();
+        document.getElementById('rec-qtd').value = "";
+    }
+
+    function renderReceita() {
+        const corpo = document.getElementById('corpo-receita');
+        corpo.innerHTML = "";
+        let total = 0;
+        receitaAtiva.forEach((item, i) => {
+            total += item.custo;
+            corpo.innerHTML += `
+                <tr>
+                    <td>${item.nome}</td>
+                    <td>${item.qtd}${item.unidade}</td>
+                    <td>R$ ${item.custo.toFixed(2)}</td>
+                    <td><button class="btn-del" onclick="receitaAtiva.splice(${i},1);renderReceita()">X</button></td>
+                </tr>`;
+        });
+        document.getElementById('total-receita').innerText = `Custo Total: R$ ${total.toFixed(2)}`;
+    }
+
+    function limparReceita() { receitaAtiva = []; renderReceita(); }
+
+    function importarBase() {
+        const base = [{"nome": "Açúcar Cristal", "preco": 5.49, "qtd": 1, "unidade": "Kg"}, {"nome": "Chocolate Melken Meio Amargo", "preco": 159.99, "qtd": 2.005, "unidade": "Kg"}, {"nome": "Manteiga", "preco": 14.99, "qtd": 200, "unidade": "g"}, {"nome": "Ovos", "preco": 25.00, "qtd": 30, "unidade": "un"}];
+        if(confirm("Importar ingredientes base da Pitada Doce?")) {
+            db = base;
+            localStorage.setItem('pitadaDB_v2', JSON.stringify(db));
+            renderIngredientes();
+        }
+    }
+
+    // Iniciar
+    renderIngredientes();
+</script>
+</body>
+</html>
