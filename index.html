@@ -3,64 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pitada Doce - Sistema Bakery v9.3</title>
+    <title>Pitada Doce - Gestão Bakery</title>
     <style>
-        :root { --rosa: #d63384; --dark: #2c3e50; --fundo: #f8f9fa; --danger: #e74c3c; --warning: #f1c40f; --sucesso: #28a745; }
+        :root { --rosa: #d63384; --dark: #2c3e50; --fundo: #f8f9fa; --danger: #e74c3c; --warning: #f1c40f; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; background: var(--fundo); }
-        #sidebar { width: 240px; background: var(--dark); color: white; display: flex; flex-direction: column; flex-shrink: 0; }
-        .logo { padding: 25px; text-align: center; font-weight: bold; background: var(--rosa); font-size: 1.2rem; }
+        #sidebar { width: 220px; background: var(--dark); color: white; display: flex; flex-direction: column; flex-shrink: 0; }
+        .logo { padding: 25px; text-align: center; font-weight: bold; background: var(--rosa); font-size: 1.1rem; }
         .nav-item { padding: 15px 25px; cursor: pointer; border-bottom: 1px solid #3e4f5f; }
         .nav-item:hover, .nav-item.active { background: #3e4f5f; border-left: 5px solid var(--rosa); }
         #content { flex: 1; padding: 20px; overflow-y: auto; }
         .tab-content { display: none; }
+        .tab-content.active { display: block; }
         .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .form-row { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; align-items: flex-end; }
         input, select { padding: 10px; border: 1px solid #ddd; border-radius: 6px; width: 100%; box-sizing: border-box; }
-        button { cursor: pointer; border: none; border-radius: 6px; font-weight: bold; padding: 10px 15px; }
-        .btn-rosa { background: var(--rosa); color: white; width: 100%; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
-        th { text-align: left; padding: 10px; background: #f8f9fa; border-bottom: 2px solid #eee; }
-        td { padding: 10px; border-bottom: 1px solid #eee; }
-        .grid-res { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-top: 15px; }
-        .card-res { padding: 15px; border-radius: 8px; color: white; text-align: center; }
-        .rec-item-salvo { border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; background: white; }
+        button { cursor: pointer; border: none; border-radius: 6px; font-weight: bold; padding: 12px 20px; transition: 0.2s; }
+        .btn-main { background: var(--rosa); color: white; width: 100%; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { text-align: left; padding: 10px; background: #f8f9fa; border-bottom: 1px solid #eee; font-size: 0.8rem; }
+        td { padding: 10px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+        .total-box { background: var(--dark); color: white; padding: 20px; border-radius: 10px; text-align: right; margin-top: 15px; }
+        .total-box b { color: var(--rosa); font-size: 1.8rem; }
+        .rec-salva { border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; background: white; }
     </style>
 </head>
 <body>
 
 <div id="sidebar">
     <div class="logo">Pitada Doce 🧁</div>
-    <div class="nav-item active" onclick="switchTab('insumos')">📦 Insumos</div>
-    <div class="nav-item" onclick="switchTab('parametros')">⚙️ Parâmetros</div>
-    <div class="nav-item" onclick="switchTab('calculadora')">➕ Criar Receita</div>
-    <div class="nav-item" onclick="switchTab('receitas_salvas')">📖 Minhas Receitas</div>
+    <div class="nav-item active" id="m-ins" onclick="navegar('insumos')">📦 Insumos</div>
+    <div class="nav-item" id="m-par" onclick="navegar('parametros')">⚙️ Parâmetros</div>
+    <div class="nav-item" id="m-cal" onclick="navegar('calculadora')">➕ Criar Receita</div>
+    <div class="nav-item" id="m-sal" onclick="navegar('receitas_salvas')">📖 Receitas Salvas</div>
 </div>
 
 <div id="content">
-    <div id="tab-insumos" class="tab-content" style="display:block;">
+    <div id="tab-insumos" class="tab-content active">
         <div class="card">
             <h2>Gestão de Insumos</h2>
             <div class="form-row">
                 <div style="flex:2"><input type="text" id="in-nome" placeholder="Nome"></div>
-                <div style="flex:1"><input type="text" id="in-preco" placeholder="R$ 0,00" oninput="maskBRL(this)"></div>
-                <div style="flex:0.5"><input type="text" id="in-peso" placeholder="Peso"></div>
+                <div style="flex:1"><input type="text" id="in-preco" placeholder="R$ 0,00" oninput="formatarBRL(this)"></div>
+                <div style="flex:0.5"><input type="text" id="in-peso" placeholder="Qtd"></div>
                 <div style="flex:0.5"><select id="in-unid"><option>g</option><option>Kg</option><option>un</option><option>ML</option><option>L</option></select></div>
-                <button class="btn-rosa" onclick="saveIngrediente()">Salvar</button>
+                <button class="btn-main" onclick="salvarInsumo()">Salvar</button>
             </div>
-            <input type="text" id="search-ing" placeholder="Filtrar..." oninput="renderIngs()" style="width:100%; margin-bottom:10px">
-            <table>
-                <thead><tr><th>Nome</th><th>Preço</th><th>Medida</th><th>Ação</th></tr></thead>
-                <tbody id="lista-insumos"></tbody>
-            </table>
-            <button onclick="resetInsumosMaster()" style="margin-top:20px; background:none; color:blue; width:100%; font-size:10px">🔄 RESTAURAR 56 ITENS ORIGINAIS</button>
+            <input type="text" id="busca-ing" placeholder="🔎 Pesquisar..." oninput="atualizarTabelaInsumos()" style="width:100%; margin-bottom:10px">
+            <table><thead><tr><th>Nome</th><th>Preço</th><th>Medida</th><th>X</th></tr></thead><tbody id="lista-insumos"></tbody></table>
+            <button onclick="reiniciarTudo()" style="margin-top:30px; background:#0d6efd; color:white; width:100%">🚀 LIMPAR MEMÓRIA E REINICIAR (Use se travar)</button>
         </div>
     </div>
 
     <div id="tab-parametros" class="tab-content">
         <div class="card">
-            <h2>⚙️ Parâmetros</h2>
+            <h2>⚙️ Parâmetros Padrão</h2>
             <div class="form-row">
                 <div><label>% Quebra</label><input type="number" id="p-quebra"></div>
                 <div><label>% Despesas</label><input type="number" id="p-despesas"></div>
                 <div><label>% Lucro Desejado</label><input type="number" id="p-lucro"></div>
-                <button class="btn-rosa" onclick="saveParams()">Salvar P
+                <button class="btn-main" onclick="salvarPar()">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-calculadora" class="tab-content">
+        <div class="card">
+            <h2>Nova Receita</h2>
+            <div class="form-row">
+                <div style="flex:2"><label>Nome</label><input type="text" id="rec-nome"></div>
+                <div style="flex:1"><label>Rendimento</label><input type="number" id="rec-renda" value="1" oninput="calcularTudo()"></div>
+            </div>
+            <div class="form-row" style="background:#eee; padding:15px; border-radius:8px">
+                <div style="flex:2"><select id="rec-drop" onchange="mostrarUnidade()"></select></div>
+                <div style="flex:1"><input type="number" id="rec-qtd" placeholder="Qtd"></div>
+                <button class="btn-main" style="width:auto" onclick="addItemRec()">+ Add</button>
+            </div>
+            <p id="label-unid-rec" style="font-weight:bold; color:var(--rosa); font-size:0.8rem">Unidade: ---</p>
+            <table><thead><tr><th>Item</th><th>Qtd</th><th>Custo</th><th></th></tr></thead><tbody id="tabela-rec"></tbody></table>
+            <div class="total-box">Custo Unitário: <b id="res-unit">R$ 0,00</b><br>Venda Sugerida: <b id="res-venda">R$ 0,00</b></div>
+            <button class="btn-main" style="margin-top:15px" onclick="salvarReceitaFinal()">💾 SALVAR RECEITA</button>
+        </div>
+    </div>
+
+    <div id="tab-receitas_salvas" class="tab-content">
+        <div class="card">
+            <h2>📖 Minhas Receitas</h2>
+            <div id="lista-salvas"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const LISTA_BRUTA = [{"nome":"Açúcar Cristal","preco":5.49,"peso":1,"unid":"Kg"},{"nome":"Açúcar Refinado","preco":4.99,"peso":1,"unid":"Kg"},{"nome":"Canela em pó","preco":4.99,"peso":30,"unid":"g"},{"nome":"Chocolate ao leite Sicao","preco":164.99,"peso":2.005,"unid":"Kg"},{"nome":"Chocolate Branco Sicao","preco":209.99,"peso":2.005,"unid":"Kg"},{"nome":"Creme de Leite","preco":4.19,"peso":200,"unid":"g"},{"nome":"Doce de Leite Frimesa","preco":10.89,"peso":400,"unid":"g"},{"nome":"Farinha de Trigo","preco":6.99,"peso":1,"unid":"Kg"},{"nome":"Fermento em pó","preco":4.99,"peso":100,"unid":"g"},{"nome":"Forminha n5","preco":3.99,"peso":100,"unid":"un"},{"nome":"Nesquick","preco":22.99,"peso":380,"unid":"g"},{"nome":"Leite condensado","preco":9.99,"peso":395,"unid":"g"},{"nome":"Leite em Pó Ninho","preco":22.99,"peso":380,"unid":"g"},{"nome":"Manteiga","preco":14.99,"peso":200,"unid":"g"},{"nome":"Ovos","preco":25,"peso":30,"unid":"un"},{"nome":"Paçoca","preco":7.19,"peso":10,"unid":"un"},{"nome":"Pasta de pistache","preco":135,"peso":250,"unid":"g"},{"nome":"Uva","preco":13.99,"peso":500,"unid":"g"},{"nome":"Amendoim Vabene","preco":21.79,"peso":1.05,"unid":"Kg"},{"nome":"Chocolate Nestlé","preco":8.48,"peso":80,"unid":"g"},{"nome":"Cacau 50%","preco":39.99,"peso":1.005,"unid":"Kg"},{"nome":"Granulado Melken","preco":49.79,"peso":400,"unid":"g"},{"nome":"Coloreti","preco":23.9,"peso":500,"unid":"g"},{"nome":"Forminha 4 Pétalas","preco":2.59,"peso":50,"unid":"un"},{"nome":"Embalagem Quadrada","preco":56.89,"peso":50,"unid":"un"},{"nome":"Coco desidratado","preco":9.99,"peso":100,"unid":"g"},{"nome":"Massa de beijinho","preco":0.2,"peso":4,"unid":"g"},{"nome":"Coco ralado menina","preco":4.99,"peso":100,"unid":"g"},{"nome":"Forminha n4 Regina","preco":3.39,"peso":100,"unid":"un"},{"nome":"Doce de Leite Portão","preco":30.79,"peso":1,"unid":"Kg"},{"nome":"Ninho cremoso","preco":20.53,"peso":670,"unid":"g"},{"nome":"Ganache chocolate","preco":5.53,"peso":180,"unid":"g"},{"nome":"Granulado Granulé","preco":45.99,"peso":400,"unid":"g"},{"nome":"Massa Casadinho Leite","preco":21.13,"peso":550,"unid":"g"},{"nome":"Massa Casadinho Ninho","preco":18.14,"peso":470,"unid":"g"},{"nome":"Açucar Mascavo","preco":10.99,"peso":1,"unid":"Kg"},{"nome":"Sal","preco":4.99,"peso":1,"unid":"Kg"},{"nome":"Bicarbonato","preco":3.69,"peso":250,"unid":"g"},{"nome":"Cacau 100%","preco":44.99,"peso":500,"unid":"g"},{"nome":"Meio Amargo Melken","preco":159.99,"peso":2.005,"unid":"Kg"},{"nome":"Branco Melken","preco":163.99,"peso":2.005,"unid":"Kg"},{"nome":"Fini Camping","preco":8.39,"peso":250,"unid":"g"},{"nome":"Ao Leite Melken","preco":162.99,"peso":2.005,"unid":"Kg"},{"nome":"Corante","preco":4.99,"peso":25,"unid":"g"},{"nome":"Essencia Baunilha","preco":13.99,"peso":960,"unid":"ML"},{"nome":"Negresco 1kg","preco":50.99,"peso":1,"unid":"Kg"},{"nome":"Nutella","preco":190,"peso":3,"unid":"Kg"},{"nome":"Mavalério","preco":4.99,"peso":150,"unid":"g"},{"nome":"Pistache cremoso","preco":65.3,"peso":585,"unid":"g"},{"nome":"Doce de Leite Cremoso","preco":13.9,"peso":360,"unid":"g"},{"nome":"Brownie 5x5","preco":2.32,"peso":35,"unid":"g"},{"nome":"Colher descartavel","preco":29.9,"peso":50,"unid":"un"},{"nome":"Brigadeiro Coxinha","preco":33.7,"peso":560,"unid":"g"}];
+
+    let insumos = JSON.parse(localStorage.getItem('bakery_ins')) || LISTA_BRUTA;
+    let par = JSON.parse(localStorage.getItem('bakery_par')) || {q:10, d:15, l:110};
+    let receitas = JSON.parse(localStorage.getItem('bakery_rec')) || [];
+    let recAtiva = [];
+    let editRecIdx = -1;
+
+    // NAVEGAÇÃO
+    window.navegar = function(id) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById('tab-' + id).classList.add('active');
+        if(id === 'receitas_salvas') renderSalvas();
+        atualizarTabelaInsumos();
+    }
+
+    // FINANCEIRO
+    window.formatarBRL = function(i) {
+        let v = i.value.replace(/\D/g,'');
+        v = (v/100).toFixed(2).replace(".", ",");
+        i.value = "R$ " + v;
+    }
+    const toNum = (v) => parseFloat(v.toString().replace(",", ".")) || 0;
+    const toBRL = (v) => parseFloat(v.replace(/[R$\s.]/g, "").replace(",", ".")) || 0;
+
+    // INSUMOS
+    window.salvarInsumo = function() {
+        const nome = document.getElementById('in-nome').value;
+        const preco = toBRL(document.getElementById('in-preco').value);
+        const peso = toNum(document.getElementById('in-peso').value);
+        const unid = document.getElementById('in-unid').value;
