@@ -3,218 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pitada Doce - Gestão Bakery v8</title>
+    <title>Pitada Doce - Sistema v9.2</title>
     <style>
         :root { --rosa: #d63384; --dark: #2c3e50; --fundo: #f8f9fa; --danger: #e74c3c; --warning: #f1c40f; --sucesso: #28a745; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; display: flex; height: 100vh; background: var(--fundo); color: #333; }
-        #sidebar { width: 220px; background: var(--dark); color: white; display: flex; flex-direction: column; flex-shrink: 0; }
-        .logo { padding: 25px; text-align: center; font-weight: bold; background: var(--rosa); font-size: 1.1rem; }
-        .nav-item { padding: 15px 25px; cursor: pointer; border-bottom: 1px solid #3e4f5f; transition: 0.3s; font-size: 0.9rem; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; display: flex; height: 100vh; background: var(--fundo); }
+        #sidebar { width: 240px; background: var(--dark); color: white; display: flex; flex-direction: column; flex-shrink: 0; }
+        .logo { padding: 25px; text-align: center; font-weight: bold; background: var(--rosa); font-size: 1.2rem; }
+        .nav-item { padding: 15px 25px; cursor: pointer; border-bottom: 1px solid #3e4f5f; transition: 0.3s; }
         .nav-item:hover, .nav-item.active { background: #3e4f5f; border-left: 5px solid var(--rosa); }
         #content { flex: 1; padding: 30px; overflow-y: auto; }
         .tab-content { display: none; }
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #eee; }
-        .form-row { display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; align-items: flex-end; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; }
+        .form-row { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; align-items: flex-end; }
         label { display: block; font-size: 0.75rem; font-weight: bold; margin-bottom: 5px; color: #666; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        button { cursor: pointer; border: none; border-radius: 8px; font-weight: bold; padding: 12px 20px; }
-        .btn-rosa { background: var(--rosa); color: white; width: 100%; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
+        button { cursor: pointer; border: none; border-radius: 6px; font-weight: bold; padding: 10px 15px; }
+        .btn-rosa { background: var(--rosa); color: white; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { text-align: left; padding: 12px; background: #f1f3f5; font-size: 0.8rem; }
-        td { padding: 10px; border-bottom: 1px solid #eee; font-size: 0.85rem; }
-        .result-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
-        .res-card { padding: 15px; border-radius: 10px; color: white; text-align: center; }
-        .bg-dark { background: var(--dark); }
-        .bg-rosa { background: var(--rosa); }
-        .bg-sucesso { background: var(--sucesso); }
+        th { text-align: left; padding: 12px; background: #f8f9fa; font-size: 0.8rem; border-bottom: 2px solid #eee; }
+        td { padding: 10px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+        .grid-res { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-top: 20px; }
+        .card-res { padding: 15px; border-radius: 8px; color: white; text-align: center; }
+        .receita-item { border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; background: white; }
     </style>
 </head>
 <body>
 
 <div id="sidebar">
     <div class="logo">Pitada Doce 🧁</div>
-    <div class="nav-item active" onclick="switchTab('ingredientes')">📦 Insumos</div>
+    <div class="nav-item active" onclick="switchTab('insumos')">📦 Insumos</div>
     <div class="nav-item" onclick="switchTab('parametros')">⚙️ Parâmetros</div>
-    <div class="nav-item" onclick="switchTab('receitas')">🎂 Receitas</div>
+    <div class="nav-item" onclick="switchTab('calculadora')">➕ Criar Receita</div>
+    <div class="nav-item" onclick="switchTab('receitas_salvas')">📖 Minhas Receitas</div>
 </div>
 
 <div id="content">
-
-    <div id="tab-ingredientes" class="tab-content" style="display: block;">
+    <div id="tab-insumos" class="tab-content" style="display:block;">
         <div class="card">
-            <h2>Cadastro de Insumos</h2>
+            <h2>Gestão de Insumos (Lista Completa)</h2>
             <div class="form-row">
-                <div style="flex: 2;"><label>Nome</label><input type="text" id="in-nome"></div>
-                <div style="flex: 1;"><label>Preço</label><input type="text" id="in-preco" oninput="maskBRL(this)"></div>
-                <div style="flex: 0.5;"><label>Qtd</label><input type="text" id="in-peso"></div>
-                <div style="flex: 0.5;"><label>Unid</label>
-                    <select id="in-unid"><option value="g">g</option><option value="Kg">Kg</option><option value="un">un</option><option value="ML">ML</option><option value="L">L</option></select>
-                </div>
+                <div style="flex:2"><label>Nome</label><input type="text" id="in-nome"></div>
+                <div style="flex:1"><label>Preço</label><input type="text" id="in-preco" oninput="maskBRL(this)"></div>
+                <div style="flex:0.5"><label>Peso</label><input type="number" id="in-peso"></div>
+                <div style="flex:0.5"><label>Unid</label><select id="in-unid"><option>g</option><option>Kg</option><option>un</option><option>ML</option><option>L</option></select></div>
+                <button class="btn-rosa" onclick="saveIngrediente()">Salvar</button>
             </div>
-            <button class="btn-rosa" onclick="handleSave()">💾 SALVAR INSUMO</button>
-        </div>
-        <div class="card">
-            <input type="text" id="search-ing" placeholder="🔎 Pesquisar..." oninput="renderIngs()" style="margin-bottom:15px">
-            <table id="table-ing">
-                <thead><tr><th>Nome</th><th>Custo</th><th>Medida</th><th>Ação</th></tr></thead>
-                <tbody id="lista-corpo"></tbody>
+            <input type="text" id="search-ing" placeholder="Filtrar ingredientes..." oninput="renderIngs()" style="margin-bottom:15px">
+            <table>
+                <thead><tr><th>Nome</th><th>Preço</th><th>Medida</th><th>Ação</th></tr></thead>
+                <tbody id="lista-insumos"></tbody>
             </table>
+            <button onclick="resetInsumosMaster()" style="margin-top:20px; background:none; color:blue; border:1px dashed blue; width:100%; font-size:10px">RESTAURAR TODOS OS 56 ITENS ORIGINAIS</button>
         </div>
     </div>
 
     <div id="tab-parametros" class="tab-content">
         <div class="card">
-            <h2>⚙️ Configurações Globais</h2>
+            <h2>⚙️ Parâmetros de Precificação</h2>
             <div class="form-row">
-                <div style="flex: 1;"><label>% Quebra Médio</label><input type="number" id="p-quebra" step="0.01"></div>
-                <div style="flex: 1;"><label>% Despesas Gerais</label><input type="number" id="p-despesas" step="0.01"></div>
-                <div style="flex: 1;"><label>Fator de Lucro (Markup)</label><input type="number" id="p-markup" step="0.1"></div>
+                <div><label>% Quebra</label><input type="number" id="p-quebra"></div>
+                <div><label>% Despesas Gerais</label><input type="number" id="p-despesas"></div>
+                <div><label>% Lucro Desejado</label><input type="number" id="p-lucro" placeholder="Ex: 110"></div>
+                <button class="btn-rosa" onclick="saveParams()">Salvar Padrões</button>
             </div>
-            <button class="btn-rosa" onclick="saveParams()">💾 SALVAR PARÂMETROS</button>
-        </div>
-        <div class="card">
-            <p style="font-size: 0.8rem; color: #666;">* Esses valores serão usados como sugestão padrão na criação de novas receitas.</p>
+            <p><small>* Lucro de 110% significa que o preço de venda será o custo multiplicado por 2.1</small></p>
         </div>
     </div>
 
-    <div id="tab-receitas" class="tab-content">
+    <div id="tab-calculadora" class="tab-content">
         <div class="card">
-            <h2>🎂 Ficha Técnica: Bolo de Coco</h2>
-            <div class="form-row" style="background: #fdf2f7; padding: 15px; border-radius: 8px;">
-                <div style="flex: 1;"><label>Rendimento (unid)</label><input type="number" id="rec-renda" value="10"></div>
-                <div style="flex: 1;"><label>% Quebra</label><input type="number" id="rec-quebra"></div>
-                <div style="flex: 1;"><label>% Despesas</label><input type="number" id="rec-despesa"></div>
-                <div style="flex: 1;"><label>Fator Lucro</label><input type="number" id="rec-markup"></div>
+            <h2 id="rec-title">Nova Receita</h2>
+            <div class="form-row">
+                <div style="flex:2"><label>Nome da Receita</label><input type="text" id="rec-nome-input"></div>
+                <div style="flex:1"><label>Rendimento (unid)</label><input type="number" id="rec-renda" value="1" oninput="renderRecipeTable()"></div>
             </div>
-
-            <div class="form-row" style="margin-top:20px">
-                <div style="flex: 2;"><label>Ingrediente</label><select id="rec-drop"></select></div>
-                <div style="flex: 1;"><label>Qtd Usada</label><input type="text" id="rec-qtd-usada"></div>
-                <div style="flex: 0.5;"><button style="background: var(--dark); color:white; width:100%" onclick="addToRecipe()">+ ADD</button></div>
+            <div class="form-row" style="background:#f1f3f5; padding:15px; border-radius:8px">
+                <div style="flex:2"><label>Ingrediente</label><select id="rec-drop" onchange="updateRecUnit()"></select></div>
+                <div style="flex:1"><label>Qtd Usada (<span id="rec-unit-label">---</span>)</label><input type="number" id="rec-qtd-usada"></div>
+                <button class="btn-rosa" onclick="addIngToRecipe()">+ Adicionar</button>
             </div>
-
             <table>
-                <thead><tr><th>Item</th><th>Uso</th><th>Custo</th><th>X</th></tr></thead>
-                <tbody id="rec-list"></tbody>
+                <thead><tr><th>Ingrediente</th><th>Uso</th><th>Custo</th><th>Ação</th></tr></thead>
+                <tbody id="rec-table-body"></tbody>
             </table>
-
-            <div class="result-grid">
-                <div class="res-card bg-dark">Custo Insumos<br><b id="res-insumos">R$ 0,00</b></div>
-                <div class="res-card bg-dark">Custo c/ Taxas<br><b id="res-taxas">R$ 0,00</b></div>
-                <div class="res-card bg-rosa">Custo Unitário<br><b id="res-unit">R$ 0,00</b></div>
-                <div class="res-card bg-sucesso">Venda Recomendada<br><b id="res-venda">R$ 0,00</b></div>
-            </div>
-        </div>
-    </div>
-
-</div>
-
-<script>
-    // LISTA ORIGINAL (53 ITENS)
-    const baseFinal = [{"nome":"Açúcar Cristal","preco":5.49,"peso":1.0,"unid":"Kg"},{"nome":"Açúcar Refinado","preco":4.99,"peso":1.0,"unid":"Kg"},{"nome":"Chocolate ao leite Sicao","preco":164.99,"peso":2.005,"unid":"Kg"},{"nome":"Creme de Leite","preco":4.19,"peso":200.0,"unid":"g"},{"nome":"Manteiga","preco":14.99,"peso":200.0,"unid":"g"},{"nome":"Ovos","preco":25.0,"peso":30.0,"unid":"un"},{"nome":"Nutella","preco":190.0,"peso":3.0,"unid":"Kg"}];
-
-    let db = JSON.parse(localStorage.getItem('pd_db_v8')) || baseFinal;
-    let params = JSON.parse(localStorage.getItem('pd_params')) || { quebra: 10, despesas: 15, markup: 2.1 };
-    let recipeItems = [];
-
-    function switchTab(tab) {
-        document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        document.getElementById('tab-' + tab).style.display = 'block';
-        event.currentTarget.classList.add('active');
-        if(tab === 'receitas') loadRecipeFields();
-        renderIngs();
-    }
-
-    function loadRecipeFields() {
-        document.getElementById('rec-quebra').value = params.quebra;
-        document.getElementById('rec-despesa').value = params.despesas;
-        document.getElementById('rec-markup').value = params.markup;
-    }
-
-    function saveParams() {
-        params = {
-            quebra: parseFloat(document.getElementById('p-quebra').value),
-            despesas: parseFloat(document.getElementById('p-despesas').value),
-            markup: parseFloat(document.getElementById('p-markup').value)
-        };
-        localStorage.setItem('pd_params', JSON.stringify(params));
-        alert("Parâmetros globais salvos!");
-    }
-
-    function maskBRL(i) {
-        let v = i.value.replace(/\D/g,'');
-        v = (v/100).toFixed(2).replace(".", ",");
-        i.value = "R$ " + v;
-    }
-
-    function parseNum(v) { return parseFloat(v.toString().replace(",", ".")) || 0; }
-    function parseBRL(v) { return parseFloat(v.replace(/[R$\s.]/g, "").replace(",", ".")) || 0; }
-
-    function handleSave() {
-        const nome = document.getElementById('in-nome').value;
-        const preco = parseBRL(document.getElementById('in-preco').value);
-        const peso = parseNum(document.getElementById('in-peso').value);
-        const unid = document.getElementById('in-unid').value;
-        db.push({ nome, preco, peso, unid });
-        localStorage.setItem('pd_db_v8', JSON.stringify(db));
-        renderIngs();
-    }
-
-    function renderIngs() {
-        const corpo = document.getElementById('lista-corpo');
-        const drop = document.getElementById('rec-drop');
-        corpo.innerHTML = "";
-        drop.innerHTML = '<option value="">-- Selecione --</option>';
-        db.sort((a,b) => a.nome.localeCompare(b.nome)).forEach((it, idx) => {
-            corpo.innerHTML += `<tr><td>${it.nome}</td><td>R$ ${it.preco.toFixed(2)}</td><td>${it.peso}${it.unid}</td><td><button onclick="db.splice(${idx},1);renderIngs()" style="color:red">X</button></td></tr>`;
-            drop.innerHTML += `<option value="${idx}">${it.nome}</option>`;
-        });
-    }
-
-    function addToRecipe() {
-        const idx = document.getElementById('rec-drop').value;
-        const qtd = parseNum(document.getElementById('rec-qtd-usada').value);
-        if(idx === "" || qtd <= 0) return;
-        const it = db[idx];
-        let divisor = it.peso;
-        if((it.unid === "Kg" || it.unid === "L") && qtd >= 10) divisor = it.peso * 1000;
-        const custo = (it.preco / divisor) * qtd;
-        recipeItems.push({ nome: it.nome, custo: custo, qtd: qtd, unid: it.unid });
-        calculateTotal();
-    }
-
-    function calculateTotal() {
-        const rendimento = parseNum(document.getElementById('rec-renda').value) || 1;
-        const quebraPerc = parseNum(document.getElementById('rec-quebra').value) / 100;
-        const despesaPerc = parseNum(document.getElementById('rec-despesa').value) / 100;
-        const markup = parseNum(document.getElementById('rec-markup').value);
-
-        let custoInsumos = recipeItems.reduce((acc, it) => acc + it.custo, 0);
-        let custoComQuebra = custoInsumos * (1 + quebraPerc);
-        let custoTotalFinal = custoComQuebra * (1 + despesaPerc);
-        let custoUnitario = custoTotalFinal / rendimento;
-        let precoVenda = custoUnitario * markup;
-
-        // Render Tabela
-        const lista = document.getElementById('rec-list');
-        lista.innerHTML = "";
-        recipeItems.forEach((it, i) => {
-            lista.innerHTML += `<tr><td>${it.nome}</td><td>${it.qtd}${it.unid}</td><td>R$ ${it.custo.toFixed(2)}</td><td onclick="recipeItems.splice(${i},1);calculateTotal()" style="color:red;cursor:pointer">✖</td></tr>`;
-        });
-
-        // Atualizar Cards
-        document.getElementById('res-insumos').innerText = "R$ " + custoInsumos.toFixed(2);
-        document.getElementById('res-taxas').innerText = "R$ " + custoTotalFinal.toFixed(2);
-        document.getElementById('res-unit').innerText = "R$ " + custoUnitario.toFixed(2);
-        document.getElementById('res-venda').innerText = "R$ " + precoVenda.toFixed(2);
-    }
-
-    // Init
-    document.getElementById('p-quebra').value = params.quebra;
-    document.getElementById('p-despesas').value = params.despesas;
-    document.getElementById('p-markup').value = params.markup;
-    renderIngs();
-</script>
-</body>
-</html>
+            <div class="grid-res">
+                <div class="card-res" style="background:var(--dark)">Custo Base<br><b id="res-base">R$ 0,00</b></div>
+                <div class="card-res" style="background:var(--dark)">Custo c/ Quebra e Desp.<br><b id="res-total">R$ 0,00</b></div>
+                <div class="card-res" style="background:var(--rosa)">Custo Unitário<br><b
