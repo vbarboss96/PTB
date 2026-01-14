@@ -3,44 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pitada Doce - Sistema Bakery v3</title>
+    <title>Pitada Doce - Sistema Bakery PRO</title>
     <style>
         :root { --rosa: #d63384; --dark: #2c3e50; --fundo: #f8f9fa; --danger: #e74c3c; --warning: #f1c40f; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; display: flex; height: 100vh; background: var(--fundo); }
-        
-        /* Menu Lateral */
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; background: var(--fundo); }
         #sidebar { width: 220px; background: var(--dark); color: white; display: flex; flex-direction: column; flex-shrink: 0; }
         .logo { padding: 25px; text-align: center; font-weight: bold; background: var(--rosa); font-size: 1.2rem; }
         .nav-item { padding: 15px 25px; cursor: pointer; border-bottom: 1px solid #3e4f5f; transition: 0.2s; }
         .nav-item:hover, .nav-item.active { background: #3e4f5f; border-left: 5px solid var(--rosa); }
-
-        /* Área de Conteúdo */
         #content { flex: 1; padding: 30px; overflow-y: auto; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-
-        /* Estilos de Cartão */
         .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #eee; }
         h2 { color: var(--dark); margin-top: 0; font-size: 1.3rem; border-bottom: 2px solid var(--fundo); padding-bottom: 10px; }
-        
-        /* Formulários */
-        .form-row { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
+        .form-row { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; align-items: flex-end; }
         label { display: block; font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; color: #666; }
         input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        
-        /* Botões */
         button { cursor: pointer; border: none; border-radius: 8px; font-weight: bold; transition: 0.2s; }
-        .btn-add { background: var(--rosa); color: white; padding: 12px 25px; width: 100%; }
+        .btn-add { background: var(--rosa); color: white; padding: 12px 25px; }
         .btn-edit { background: var(--warning); color: #000; padding: 6px 12px; font-size: 0.75rem; }
         .btn-del { background: var(--danger); color: white; padding: 6px 12px; font-size: 0.75rem; }
-
-        /* Tabela */
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th { text-align: left; padding: 12px; background: #f1f3f5; color: #495057; }
         td { padding: 12px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
-        
-        .total-box { background: var(--dark); color: white; padding: 25px; border-radius: 12px; text-align: right; margin-top: 20px; font-size: 1.2rem; }
+        .pagination { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+        .pagination button { background: white; border: 1px solid #ddd; padding: 8px 15px; }
+        .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .total-box { background: var(--dark); color: white; padding: 20px; border-radius: 12px; text-align: right; margin-top: 20px; font-size: 1.2rem; }
         .total-box b { color: var(--rosa); font-size: 1.6rem; }
+        #search-input { margin-bottom: 15px; border: 2px solid var(--rosa-claro); }
     </style>
 </head>
 <body>
@@ -52,7 +43,6 @@
 </div>
 
 <div id="content">
-
     <div id="tab-ingredientes" class="tab-content active">
         <div class="card">
             <h2 id="form-title">Gerenciar Insumos</h2>
@@ -60,11 +50,11 @@
             <div class="form-row">
                 <div style="flex: 2;">
                     <label>Nome</label>
-                    <input type="text" id="in-nome" placeholder="Ex: Manteiga">
+                    <input type="text" id="in-nome">
                 </div>
                 <div style="flex: 1.2;">
                     <label>Preço</label>
-                    <input type="text" id="in-preco" placeholder="R$ 0,00" oninput="maskBRL(this)">
+                    <input type="text" id="in-preco" oninput="maskBRL(this)">
                 </div>
                 <div style="flex: 0.8;">
                     <label>Peso/Qtd</label>
@@ -78,21 +68,28 @@
                         <option value="ML">ML</option>
                         <option value="L">L</option>
                         <option value="Mg">Mg</option>
-                        <option value="un">un (unidade)</option>
+                        <option value="un">un</option>
                     </select>
                 </div>
             </div>
-            <button class="btn-add" id="btn-save" onclick="handleSave()">💾 SALVAR NO BANCO DE DADOS</button>
-            <button id="btn-cancel" style="display:none; width:100%; margin-top:10px; background:#ccc; padding:10px;" onclick="resetForm()">Cancelar Edição</button>
+            <button class="btn-add" style="width:100%" onclick="handleSave()">💾 SALVAR INGREDIENTE</button>
+            <button id="btn-cancel" style="display:none; width:100%; margin-top:10px;" onclick="resetForm()">Cancelar</button>
         </div>
 
         <div class="card">
+            <label>🔎 Pesquisar Ingrediente</label>
+            <input type="text" id="search-input" placeholder="Digite o nome (ex: açucar)..." oninput="handleSearch()">
             <table>
                 <thead>
                     <tr><th>Ingrediente</th><th>Preço</th><th>Medida</th><th>Ações</th></tr>
                 </thead>
                 <tbody id="lista-corpo"></tbody>
             </table>
+            <div class="pagination">
+                <button onclick="changePage(-1)" id="prevBtn">Anterior</button>
+                <span id="pageInfo" style="align-self: center; font-size: 0.9rem;"></span>
+                <button onclick="changePage(1)" id="nextBtn">Próximo</button>
+            </div>
         </div>
     </div>
 
@@ -102,14 +99,14 @@
             <div class="form-row">
                 <div style="flex: 2;">
                     <label>Selecione o Insumo</label>
-                    <select id="rec-drop"></select>
+                    <select id="rec-drop" onchange="updateRecipeUnit()"></select>
                 </div>
                 <div style="flex: 1;">
-                    <label>Qtd na Receita</label>
-                    <input type="number" id="rec-qtd-usada" placeholder="Ex: 250">
+                    <label>Qtd na Receita (<span id="unit-label">---</span>)</label>
+                    <input type="number" id="rec-qtd-usada">
                 </div>
-                <div style="flex: 0.5; align-self: flex-end;">
-                    <button class="btn-add" style="background: var(--dark);" onclick="addToRecipe()">+ ADD</button>
+                <div style="flex: 0.5;">
+                    <button class="btn-add" style="background: var(--dark); width:100%" onclick="addToRecipe()">+ ADD</button>
                 </div>
             </div>
             <table>
@@ -117,23 +114,32 @@
                 <tbody id="rec-list"></tbody>
             </table>
             <div class="total-box">Custo Total: <b id="rec-total">R$ 0,00</b></div>
-            <button onclick="clearRecipe()" style="background:none; color: #999; margin-top:10px; font-size:0.8rem;">LIMPAR RECEITA</button>
+            <button onclick="clearRecipe()" style="background:none; color: #999; margin-top:10px;">LIMPAR RECEITA</button>
         </div>
     </div>
 </div>
 
 <script>
-    // BASE DE DADOS COMPLETA E TRATADA (53 ITENS)
+    // BASE DE DADOS COMPLETA
     const baseExtraida = [{"nome":"Açúcar Cristal","preco":5.49,"peso":1,"unid":"Kg"},{"nome":"Açúcar Refinado","preco":4.99,"peso":1,"unid":"Kg"},{"nome":"Canela em pó","preco":4.99,"peso":30,"unid":"g"},{"nome":"Chocolate ao leite Sicao","preco":164.99,"peso":2.005,"unid":"Kg"},{"nome":"Chocolate Branco Sicao","preco":209.99,"peso":2.005,"unid":"Kg"},{"nome":"Creme de Leite","preco":4.19,"peso":200,"unid":"g"},{"nome":"Doce de Leite Frimesa","preco":10.89,"peso":400,"unid":"g"},{"nome":"Farinha de Trigo","preco":6.99,"peso":1,"unid":"Kg"},{"nome":"Fermento em pó","preco":4.99,"peso":100,"unid":"g"},{"nome":"Forminha n5","preco":3.99,"peso":100,"unid":"un"},{"nome":"Nesquick","preco":22.99,"peso":380,"unid":"g"},{"nome":"Leite condensado","preco":9.99,"peso":395,"unid":"g"},{"nome":"Leite em Pó Ninho","preco":22.99,"peso":380,"unid":"g"},{"nome":"Manteiga","preco":14.99,"peso":200,"unid":"g"},{"nome":"Ovos","preco":25.00,"peso":30,"unid":"un"},{"nome":"Paçoca","preco":7.19,"peso":10,"unid":"un"},{"nome":"Pasta de pistache Magna Crema","preco":135.00,"peso":250,"unid":"g"},{"nome":"Uva","preco":13.99,"peso":500,"unid":"g"},{"nome":"Amendoim Torrado Granulado Vabene","preco":21.79,"peso":1.050,"unid":"Kg"},{"nome":"Chocolate em barra Nestlé","preco":8.48,"peso":80,"unid":"g"},{"nome":"Cacau em Pó 50% Genuíne","preco":39.99,"peso":1.005,"unid":"Kg"},{"nome":"Granulado Vermicelli Melken Ao Leite","preco":49.79,"peso":400,"unid":"g"},{"nome":"Confeito de Chocolate Coloreti","preco":23.90,"peso":500,"unid":"g"},{"nome":"Forminha 4 Pétalas","preco":2.59,"peso":50,"unid":"un"},{"nome":"Embalagem Quadrada Brigadeiros 250ml","preco":56.89,"peso":50,"unid":"un"},{"nome":"Coco ralado desidratado","preco":9.99,"peso":100,"unid":"g"},{"nome":"Massa de beijinho","preco":0.20,"peso":4,"unid":"g"},{"nome":"Coco ralado menina","preco":4.99,"peso":100,"unid":"g"},{"nome":"Forminha n4 Regina","preco":3.39,"peso":100,"unid":"un"},{"nome":"Doce de Leite Portão de Cambuí","preco":30.79,"peso":1,"unid":"Kg"},{"nome":"Ninho cremoso","preco":20.53,"peso":670,"unid":"g"},{"nome":"Ganache chocolate","preco":5.53,"peso":180,"unid":"g"},{"nome":"Granulado Granulé Melken Ao Leite","preco":45.99,"peso":400,"unid":"g"},{"nome":"Massa ao leite 11g (Casadinho)","preco":21.13,"peso":550,"unid":"g"},{"nome":"Massa ninho 11g (Casadinho)","preco":18.14,"peso":470,"unid":"g"},{"nome":"Açucar Mascavo","preco":10.99,"peso":1,"unid":"Kg"},{"nome":"Sal","preco":4.99,"peso":1,"unid":"Kg"},{"nome":"Bicarbonato de Sódio","preco":3.69,"peso":250,"unid":"g"},{"nome":"Cacau em Pó 100% Genuíne","preco":44.99,"peso":500,"unid":"g"},{"nome":"Chocolate Meio Amargo Melken","preco":159.99,"peso":2.005,"unid":"Kg"},{"nome":"Chocolate Branco Melken","preco":163.99,"peso":2.005,"unid":"Kg"},{"nome":"Fini Camping","preco":8.39,"peso":250,"unid":"g"},{"nome":"Chocolate Ao Leite Melken","preco":162.99,"peso":2.005,"unid":"Kg"},{"nome":"Corante vermelho em gel","preco":4.99,"peso":25,"unid":"g"},{"nome":"Essencia Baunilha Branca","preco":13.99,"peso":960,"unid":"ML"},{"nome":"Biscoito Granulado Negresco","preco":50.99,"peso":1,"unid":"Kg"},{"nome":"Nutella","preco":190.00,"peso":3,"unid":"Kg"},{"nome":"Confeito Miçanga Mavalério","preco":4.99,"peso":150,"unid":"g"},{"nome":"Pistache cremoso","preco":65.30,"peso":585,"unid":"g"},{"nome":"Doce de Leite Cremoso","preco":13.90,"peso":360,"unid":"g"},{"nome":"Brownie pedaço 5x5","preco":2.32,"peso":35,"unid":"g"},{"nome":"Colher descartavel","preco":29.90,"peso":50,"unid":"un"},{"nome":"Brigadeiro ao leite - coxinha","preco":33.70,"peso":560,"unid":"g"}];
 
-    let db = JSON.parse(localStorage.getItem('pitadaDataV3')) || baseExtraida;
+    let db = JSON.parse(localStorage.getItem('pitadaDataV4')) || baseExtraida;
+    let filteredDB = [...db];
     let currentRecipe = [];
+    let currentPage = 1;
+    const itemsPerPage = 10;
+
+    // Normalizador de texto (remover acentos)
+    function normalizeStr(str) {
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    }
 
     function switchTab(tab) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(m => m.classList.remove('active'));
         document.getElementById('tab-' + tab).classList.add('active');
         document.getElementById('menu-' + (tab === 'ingredientes' ? 'ing' : 'rec')).classList.add('active');
+        renderIngs();
     }
 
     function maskBRL(i) {
@@ -152,108 +158,4 @@
     function handleSave() {
         const nome = document.getElementById('in-nome').value;
         const preco = parseBRL(document.getElementById('in-preco').value);
-        const peso = parseFloat(document.getElementById('in-peso').value);
-        const unid = document.getElementById('in-unid').value;
-        const editId = parseInt(document.getElementById('edit-id').value);
-
-        if(!nome || preco <= 0 || !peso) return alert("Erro: Verifique os campos!");
-
-        if(editId > -1) {
-            if(!confirm("Deseja confirmar a edição de " + nome + "?")) return;
-            db[editId] = { nome, preco, peso, unid };
-        } else {
-            db.push({ nome, preco, peso, unid });
-        }
-
-        saveAndRefresh();
-        resetForm();
-    }
-
-    function saveAndRefresh() {
-        localStorage.setItem('pitadaDataV3', JSON.stringify(db));
-        renderIngs();
-    }
-
-    function renderIngs() {
-        const corpo = document.getElementById('lista-corpo');
-        const drop = document.getElementById('rec-drop');
-        corpo.innerHTML = "";
-        drop.innerHTML = '<option value="">-- Selecione um Insumo --</option>';
-
-        db.sort((a,b) => a.nome.localeCompare(b.nome)).forEach((item, i) => {
-            corpo.innerHTML += `<tr>
-                <td><b>${item.nome}</b></td>
-                <td>R$ ${item.preco.toFixed(2)}</td>
-                <td>${item.peso}${item.unid}</td>
-                <td>
-                    <button class="btn-edit" onclick="startEdit(${i})">Editar</button>
-                    <button class="btn-del" onclick="handleDelete(${i})">X</button>
-                </td>
-            </tr>`;
-            drop.innerHTML += `<option value="${i}">${item.nome}</option>`;
-        });
-    }
-
-    function handleDelete(i) {
-        if(confirm("DELETAR " + db[i].nome + "? Esta ação é permanente.")) {
-            db.splice(i, 1);
-            saveAndRefresh();
-        }
-    }
-
-    function startEdit(i) {
-        const item = db[i];
-        document.getElementById('edit-id').value = i;
-        document.getElementById('in-nome').value = item.nome;
-        document.getElementById('in-preco').value = "R$ " + item.preco.toFixed(2).replace(".",",");
-        document.getElementById('in-peso').value = item.peso;
-        document.getElementById('in-unid').value = item.unid;
-        document.getElementById('form-title').innerText = "📝 Editando: " + item.nome;
-        document.getElementById('btn-save').innerText = "ATUALIZAR DADOS";
-        document.getElementById('btn-cancel').style.display = "block";
-        window.scrollTo(0,0);
-    }
-
-    function resetForm() {
-        document.getElementById('edit-id').value = "-1";
-        document.getElementById('in-nome').value = "";
-        document.getElementById('in-preco').value = "";
-        document.getElementById('in-peso').value = "";
-        document.getElementById('form-title').innerText = "Gerenciar Insumos";
-        document.getElementById('btn-save').innerText = "💾 SALVAR NO BANCO DE DADOS";
-        document.getElementById('btn-cancel').style.display = "none";
-    }
-
-    function addToRecipe() {
-        const idx = document.getElementById('rec-drop').value;
-        const qtdUsada = parseFloat(document.getElementById('rec-qtd-usada').value);
-        if(idx === "" || !qtdUsada) return alert("Selecione o item e a quantidade!");
-
-        const item = db[idx];
-        let divisor = item.peso;
-        if(item.unid === "Kg" || item.unid === "L") divisor = item.peso * 1000;
-
-        const subtotal = (item.preco / divisor) * qtdUsada;
-        currentRecipe.push({ nome: item.nome, qtd: qtdUsada, custo: subtotal });
-        
-        renderRecipe();
-        document.getElementById('rec-qtd-usada').value = "";
-    }
-
-    function renderRecipe() {
-        const corpo = document.getElementById('rec-list');
-        corpo.innerHTML = "";
-        let total = 0;
-        currentRecipe.forEach((it, i) => {
-            total += it.custo;
-            corpo.innerHTML += `<tr><td>${it.nome}</td><td>${it.qtd}</td><td>R$ ${it.custo.toFixed(2)}</td><td onclick="currentRecipe.splice(${i},1);renderRecipe()" style="color:red; cursor:pointer;">✖️</td></tr>`;
-        });
-        document.getElementById('rec-total').innerText = "R$ " + total.toFixed(2);
-    }
-
-    function clearRecipe() { currentRecipe = []; renderRecipe(); }
-
-    renderIngs();
-</script>
-</body>
-</html>
+        const peso = parseFloat(document.getElementById
