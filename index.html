@@ -3,28 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pitada Doce - Sistema v9.2</title>
+    <title>Pitada Doce - Sistema Bakery v9.3</title>
     <style>
         :root { --rosa: #d63384; --dark: #2c3e50; --fundo: #f8f9fa; --danger: #e74c3c; --warning: #f1c40f; --sucesso: #28a745; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; display: flex; height: 100vh; background: var(--fundo); }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; background: var(--fundo); }
         #sidebar { width: 240px; background: var(--dark); color: white; display: flex; flex-direction: column; flex-shrink: 0; }
         .logo { padding: 25px; text-align: center; font-weight: bold; background: var(--rosa); font-size: 1.2rem; }
-        .nav-item { padding: 15px 25px; cursor: pointer; border-bottom: 1px solid #3e4f5f; transition: 0.3s; }
+        .nav-item { padding: 15px 25px; cursor: pointer; border-bottom: 1px solid #3e4f5f; }
         .nav-item:hover, .nav-item.active { background: #3e4f5f; border-left: 5px solid var(--rosa); }
-        #content { flex: 1; padding: 30px; overflow-y: auto; }
+        #content { flex: 1; padding: 20px; overflow-y: auto; }
         .tab-content { display: none; }
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .form-row { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; align-items: flex-end; }
-        label { display: block; font-size: 0.75rem; font-weight: bold; margin-bottom: 5px; color: #666; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
+        input, select { padding: 10px; border: 1px solid #ddd; border-radius: 6px; width: 100%; box-sizing: border-box; }
         button { cursor: pointer; border: none; border-radius: 6px; font-weight: bold; padding: 10px 15px; }
-        .btn-rosa { background: var(--rosa); color: white; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { text-align: left; padding: 12px; background: #f8f9fa; font-size: 0.8rem; border-bottom: 2px solid #eee; }
-        td { padding: 10px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
-        .grid-res { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-top: 20px; }
+        .btn-rosa { background: var(--rosa); color: white; width: 100%; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
+        th { text-align: left; padding: 10px; background: #f8f9fa; border-bottom: 2px solid #eee; }
+        td { padding: 10px; border-bottom: 1px solid #eee; }
+        .grid-res { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-top: 15px; }
         .card-res { padding: 15px; border-radius: 8px; color: white; text-align: center; }
-        .receita-item { border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; background: white; }
+        .rec-item-salvo { border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; background: white; }
     </style>
 </head>
 <body>
@@ -40,53 +39,28 @@
 <div id="content">
     <div id="tab-insumos" class="tab-content" style="display:block;">
         <div class="card">
-            <h2>Gestão de Insumos (Lista Completa)</h2>
+            <h2>Gestão de Insumos</h2>
             <div class="form-row">
-                <div style="flex:2"><label>Nome</label><input type="text" id="in-nome"></div>
-                <div style="flex:1"><label>Preço</label><input type="text" id="in-preco" oninput="maskBRL(this)"></div>
-                <div style="flex:0.5"><label>Peso</label><input type="number" id="in-peso"></div>
-                <div style="flex:0.5"><label>Unid</label><select id="in-unid"><option>g</option><option>Kg</option><option>un</option><option>ML</option><option>L</option></select></div>
+                <div style="flex:2"><input type="text" id="in-nome" placeholder="Nome"></div>
+                <div style="flex:1"><input type="text" id="in-preco" placeholder="R$ 0,00" oninput="maskBRL(this)"></div>
+                <div style="flex:0.5"><input type="text" id="in-peso" placeholder="Peso"></div>
+                <div style="flex:0.5"><select id="in-unid"><option>g</option><option>Kg</option><option>un</option><option>ML</option><option>L</option></select></div>
                 <button class="btn-rosa" onclick="saveIngrediente()">Salvar</button>
             </div>
-            <input type="text" id="search-ing" placeholder="Filtrar ingredientes..." oninput="renderIngs()" style="margin-bottom:15px">
+            <input type="text" id="search-ing" placeholder="Filtrar..." oninput="renderIngs()" style="width:100%; margin-bottom:10px">
             <table>
                 <thead><tr><th>Nome</th><th>Preço</th><th>Medida</th><th>Ação</th></tr></thead>
                 <tbody id="lista-insumos"></tbody>
             </table>
-            <button onclick="resetInsumosMaster()" style="margin-top:20px; background:none; color:blue; border:1px dashed blue; width:100%; font-size:10px">RESTAURAR TODOS OS 56 ITENS ORIGINAIS</button>
+            <button onclick="resetInsumosMaster()" style="margin-top:20px; background:none; color:blue; width:100%; font-size:10px">🔄 RESTAURAR 56 ITENS ORIGINAIS</button>
         </div>
     </div>
 
     <div id="tab-parametros" class="tab-content">
         <div class="card">
-            <h2>⚙️ Parâmetros de Precificação</h2>
+            <h2>⚙️ Parâmetros</h2>
             <div class="form-row">
                 <div><label>% Quebra</label><input type="number" id="p-quebra"></div>
-                <div><label>% Despesas Gerais</label><input type="number" id="p-despesas"></div>
-                <div><label>% Lucro Desejado</label><input type="number" id="p-lucro" placeholder="Ex: 110"></div>
-                <button class="btn-rosa" onclick="saveParams()">Salvar Padrões</button>
-            </div>
-            <p><small>* Lucro de 110% significa que o preço de venda será o custo multiplicado por 2.1</small></p>
-        </div>
-    </div>
-
-    <div id="tab-calculadora" class="tab-content">
-        <div class="card">
-            <h2 id="rec-title">Nova Receita</h2>
-            <div class="form-row">
-                <div style="flex:2"><label>Nome da Receita</label><input type="text" id="rec-nome-input"></div>
-                <div style="flex:1"><label>Rendimento (unid)</label><input type="number" id="rec-renda" value="1" oninput="renderRecipeTable()"></div>
-            </div>
-            <div class="form-row" style="background:#f1f3f5; padding:15px; border-radius:8px">
-                <div style="flex:2"><label>Ingrediente</label><select id="rec-drop" onchange="updateRecUnit()"></select></div>
-                <div style="flex:1"><label>Qtd Usada (<span id="rec-unit-label">---</span>)</label><input type="number" id="rec-qtd-usada"></div>
-                <button class="btn-rosa" onclick="addIngToRecipe()">+ Adicionar</button>
-            </div>
-            <table>
-                <thead><tr><th>Ingrediente</th><th>Uso</th><th>Custo</th><th>Ação</th></tr></thead>
-                <tbody id="rec-table-body"></tbody>
-            </table>
-            <div class="grid-res">
-                <div class="card-res" style="background:var(--dark)">Custo Base<br><b id="res-base">R$ 0,00</b></div>
-                <div class="card-res" style="background:var(--dark)">Custo c/ Quebra e Desp.<br><b id="res-total">R$ 0,00</b></div>
-                <div class="card-res" style="background:var(--rosa)">Custo Unitário<br><b
+                <div><label>% Despesas</label><input type="number" id="p-despesas"></div>
+                <div><label>% Lucro Desejado</label><input type="number" id="p-lucro"></div>
+                <button class="btn-rosa" onclick="saveParams()">Salvar P
