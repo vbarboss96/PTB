@@ -1,64 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pitada Doce - Lista Completa</title>
+    <style>
+        :root { --rosa: #d63384; --dark: #2c3e50; --fundo: #f8f9fa; --danger: #e74c3c; --warning: #f1c40f; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; display: flex; height: 100vh; background: var(--fundo); color: #333; }
+        #sidebar { width: 220px; background: var(--dark); color: white; display: flex; flex-direction: column; flex-shrink: 0; }
+        .logo { padding: 25px; text-align: center; font-weight: bold; background: var(--rosa); font-size: 1.1rem; }
+        .nav-item { padding: 15px 25px; cursor: pointer; border-bottom: 1px solid #3e4f5f; transition: 0.3s; }
+        .nav-item:hover, .nav-item.active { background: #3e4f5f; border-left: 5px solid var(--rosa); }
+        #content { flex: 1; padding: 30px; overflow-y: auto; }
+        .tab-content { display: none; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #eee; }
+        .form-row { display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; align-items: flex-end; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        button { cursor: pointer; border: none; border-radius: 8px; font-weight: bold; padding: 12px 20px; }
+        .btn-add { background: var(--rosa); color: white; width: 100%; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 12px; background: #f1f3f5; font-size: 0.8rem; }
+        td { padding: 10px; border-bottom: 1px solid #eee; font-size: 0.85rem; }
+        .total-box { background: var(--dark); color: white; padding: 20px; border-radius: 12px; text-align: right; margin-top: 20px; }
+        .total-box b { color: var(--rosa); font-size: 1.8rem; }
+    </style>
+</head>
+<body>
+
+<div id="sidebar">
+    <div class="logo">Pitada Doce 🧁</div>
+    <div class="nav-item active" onclick="switchTab('ingredientes')">📦 Lista de Insumos</div>
+    <div class="nav-item" onclick="switchTab('receitas')">🎂 Calculadora</div>
+</div>
+
+<div id="content">
+    <div id="tab-ingredientes" class="tab-content" style="display: block;">
+        <div class="card">
+            <h2 id="form-title">Cadastrar/Editar</h2>
+            <input type="hidden" id="edit-id" value="-1">
+            <div class="form-row">
+                <div style="flex: 2;"><input type="text" id="in-nome" placeholder="Nome do item"></div>
+                <div style="flex: 1.2;"><input type="text" id="in-preco" placeholder="Preço" oninput="maskBRL(this)"></div>
+                <div style="flex: 0.8;"><input type="text" id="in-peso" placeholder="Peso/Qtd"></div>
+                <div style="flex: 0.8;">
+                    <select id="in-unid">
+                        <option value="g">g</option><option value="Kg">Kg</option>
+                        <option value="ML">ML</option><option value="L">L</option>
+                        <option value="un">un</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn-add" onclick="handleSave()">💾 SALVAR NO BANCO</button>
+            <button id="btn-cancel" style="display:none; width:100%; margin-top:10px; background:#ccc;" onclick="resetForm()">Cancelar</button>
+        </div>
+        <div class="card">
+            <input type="text" id="search-input" placeholder="🔎 Pesquisar na lista completa..." oninput="renderIngs()" style="margin-bottom: 15px;">
+            <table>
+                <thead><tr><th>Nome</th><th>Preço</th><th>Medida</th><th>Ações</th></tr></thead>
+                <tbody id="lista-corpo"></tbody>
+            </table>
+            <button onclick="forcarCarga()" style="background:none; color:#0d6efd; width:100%; font-size:0.75rem; margin-top:30px; border: 1px dashed #0d6efd; padding: 10px;">🔄 RESETAR PARA LISTA ORIGINAL DA PLANILHA</button>
+        </div>
+    </div>
+
+    <div id="tab-receitas" class="tab-content">
+        <div class="card">
+            <h2>Calculadora de Receita</h2>
+            <div class="form-row">
+                <div style="flex: 2.5;"><select id="rec-drop" onchange="updateRecipeUnit()"></select></div>
+                <div style="flex: 1;"><input type="text" id="rec-qtd-usada" placeholder="Qtd usada"></div>
+                <div style="flex: 0.5;"><button style="background: var(--dark); color:white; width:100%" onclick="addToRecipe()">+ ADD</button></div>
+            </div>
+            <p id="label-u" style="color:var(--rosa); font-size: 0.8rem; font-weight: bold;">Unidade: ---</p>
+            <table>
+                <thead><tr><th>Item</th><th>Uso</th><th>Subtotal</th><th></th></tr></thead>
+                <tbody id="rec-list"></tbody>
+            </table>
+            <div class="total-box">Custo Total: <b id="rec-total">R$ 0,00</b></div>
+        </div>
+    </div>
+</div>
+
 <script>
-    // LISTA COMPLETA RECUPERADA (53 ITENS)
+    // AQUI ESTÃO OS 53+ ITENS EXTRAÍDOS E TRATADOS
     const baseFinal = [{"nome":"Açúcar Cristal","preco":5.49,"peso":1.0,"unid":"Kg"},{"nome":"Açúcar Refinado","preco":4.99,"peso":1.0,"unid":"Kg"},{"nome":"Canela em pó","preco":4.99,"peso":30.0,"unid":"g"},{"nome":"Chocolate ao leite Sicao","preco":164.99,"peso":2.005,"unid":"Kg"},{"nome":"Chocolate Branco Sicao","preco":209.99,"peso":2.005,"unid":"Kg"},{"nome":"Creme de Leite","preco":4.19,"peso":200.0,"unid":"g"},{"nome":"Doce de Leite Frimesa","preco":10.89,"peso":400.0,"unid":"g"},{"nome":"Farinha de Trigo","preco":6.99,"peso":1.0,"unid":"Kg"},{"nome":"Fermento em pó","preco":4.99,"peso":100.0,"unid":"g"},{"nome":"Forminha n5","preco":3.99,"peso":100.0,"unid":"un"},{"nome":"Nesquick","preco":22.99,"peso":380.0,"unid":"g"},{"nome":"Leite condensado","preco":9.99,"peso":395.0,"unid":"g"},{"nome":"Leite em Pó Ninho","preco":22.99,"peso":380.0,"unid":"g"},{"nome":"Manteiga","preco":14.99,"peso":200.0,"unid":"g"},{"nome":"Ovos","preco":25.0,"peso":30.0,"unid":"un"},{"nome":"Paçoca","preco":7.19,"peso":10.0,"unid":"un"},{"nome":"Pasta de pistache Magna Crema","preco":135.0,"peso":250.0,"unid":"g"},{"nome":"Uva","preco":13.99,"peso":500.0,"unid":"g"},{"nome":"Amendoim Vabene","preco":21.79,"peso":1.05,"unid":"Kg"},{"nome":"Chocolate Nestlé","preco":8.48,"peso":80.0,"unid":"g"},{"nome":"Cacau 50% Genuíne","preco":39.99,"peso":1.005,"unid":"Kg"},{"nome":"Granulado Vermicelli Melken","preco":49.79,"peso":400.0,"unid":"g"},{"nome":"Coloreti","preco":23.9,"peso":500.0,"unid":"g"},{"nome":"Forminha 4 Pétalas","preco":2.59,"peso":50.0,"unid":"un"},{"nome":"Embalagem Quadrada 250ml","preco":56.89,"peso":50.0,"unid":"un"},{"nome":"Coco desidratado","preco":9.99,"peso":100.0,"unid":"g"},{"nome":"Massa de beijinho","preco":0.2,"peso":4.0,"unid":"g"},{"nome":"Coco ralado menina","preco":4.99,"peso":100.0,"unid":"g"},{"nome":"Forminha n4 Regina","preco":3.39,"peso":100.0,"unid":"un"},{"nome":"Doce de Leite Portão","preco":30.79,"peso":1.0,"unid":"Kg"},{"nome":"Ninho cremoso","preco":20.53,"peso":670.0,"unid":"g"},{"nome":"Ganache chocolate","preco":5.53,"peso":180.0,"unid":"g"},{"nome":"Granulado Granulé","preco":45.99,"peso":400.0,"unid":"g"},{"nome":"Massa Casadinho Leite","preco":21.13,"peso":550.0,"unid":"g"},{"nome":"Massa Casadinho Ninho","preco":18.14,"peso":470.0,"unid":"g"},{"nome":"Açucar Mascavo","preco":10.99,"peso":1.0,"unid":"Kg"},{"nome":"Sal","preco":4.99,"peso":1.0,"unid":"Kg"},{"nome":"Bicarbonato","preco":3.69,"peso":250.0,"unid":"g"},{"nome":"Cacau 100% Genuíne","preco":44.99,"peso":500.0,"unid":"g"},{"nome":"Choc. Meio Amargo Melken","preco":159.99,"peso":2.005,"unid":"Kg"},{"nome":"Choc. Branco Melken","preco":163.99,"peso":2.005,"unid":"Kg"},{"nome":"Fini Camping","preco":8.39,"peso":250.0,"unid":"g"},{"nome":"Choc. Ao Leite Melken","preco":162.99,"peso":2.005,"unid":"Kg"},{"nome":"Corante Vermelho","preco":4.99,"peso":25.0,"unid":"g"},{"nome":"Essencia Baunilha","preco":13.99,"peso":960.0,"unid":"ML"},{"nome":"Negresco 1kg","preco":50.99,"peso":1.0,"unid":"Kg"},{"nome":"Nutella","preco":190.0,"peso":3.0,"unid":"Kg"},{"nome":"Confeito Mavalério","preco":4.99,"peso":150.0,"unid":"g"},{"nome":"Pistache cremoso","preco":65.3,"peso":585.0,"unid":"g"},{"nome":"Doce de Leite Cremoso","preco":13.9,"peso":360.0,"unid":"g"},{"nome":"Brownie 5x5","preco":2.32,"peso":35.0,"unid":"g"},{"nome":"Colher descartavel","preco":29.9,"peso":50.0,"unid":"un"},{"nome":"Brigadeiro Coxinha","preco":33.7,"peso":560.0,"unid":"g"}];
 
-    let db = [];
-    try {
-        db = JSON.parse(localStorage.getItem('pitadaDataV7.5')) || baseFinal;
-    } catch(e) {
-        db = baseFinal;
-    }
-    
+    let db = JSON.parse(localStorage.getItem('pitadaDataFinal')) || baseFinal;
     let recipeItems = [];
-    let currentPage = 1;
-    const itemsPerPage = 10;
 
-    function normalize(s) { return s ? s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : ""; }
-
-    // BOTÃO DE ABAS CORRIGIDO
     window.switchTab = function(tab) {
         document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        
-        const target = document.getElementById('tab-' + tab);
-        if(target) target.style.display = 'block';
-        
-        // Ativa o botão correto no menu
-        const items = document.querySelectorAll('.nav-item');
-        if(tab === 'ingredientes') items[0].classList.add('active');
-        if(tab === 'receitas') items[1].classList.add('active');
-        
+        document.getElementById('tab-' + tab).style.display = 'block';
+        event.currentTarget.classList.add('active');
         renderIngs();
     };
 
-    function maskBRL(i) {
+    window.maskBRL = function(i) {
         let v = i.value.replace(/\D/g,'');
         v = (v/100).toFixed(2).replace(".", ",");
         v = v.replace(/(\d)(\d{3})(\d{3}),/g, "$1.$2.$3,");
         v = v.replace(/(\d)(\d{3}),/g, "$1.$2,");
         i.value = "R$ " + v;
-    }
+    };
 
     function parseNum(v) { return parseFloat(v.toString().replace(",", ".")) || 0; }
     function parseBRL(v) { return parseFloat(v.replace(/[R$\s.]/g, "").replace(",", ".")) || 0; }
 
     window.handleSave = function() {
-        try {
-            const nome = document.getElementById('in-nome').value.trim();
-            const preco = parseBRL(document.getElementById('in-preco').value);
-            const peso = parseNum(document.getElementById('in-peso').value);
-            const unid = document.getElementById('in-unid').value;
-            const editId = parseInt(document.getElementById('edit-id').value);
+        const nome = document.getElementById('in-nome').value.trim();
+        const preco = parseBRL(document.getElementById('in-preco').value);
+        const peso = parseNum(document.getElementById('in-peso').value);
+        const unid = document.getElementById('in-unid').value;
+        const editId = parseInt(document.getElementById('edit-id').value);
 
-            if(!nome || preco <= 0 || peso <= 0) {
-                alert("Preencha todos os campos!");
-                return;
+        if(!nome || preco <= 0) return alert("Preencha nome e preço!");
+
+        if(editId > -1) db[editId] = { nome, preco, peso, unid };
+        else db.push({ nome, preco, peso, unid });
+
+        localStorage.setItem('pitadaDataFinal', JSON.stringify(db));
+        resetForm(); renderIngs();
+    };
+
+    window.renderIngs = function() {
+        const corpo = document.getElementById('lista-corpo');
+        const search = (document.getElementById('search-input').value || "").toLowerCase();
+        corpo.innerHTML = "";
+        
+        db.sort((a,b) => a.nome.localeCompare(b.nome)).forEach((it, idx) => {
+            if(it.nome.toLowerCase().includes(search)) {
+                corpo.innerHTML += `<tr><td><b>${it.nome}</b></td><td>R$ ${it.preco.toFixed(2)}</td><td>${it.peso}${it.unid}</td>
+                <td><button onclick="startEdit(${idx})" style="background:var(--warning); padding:5px 10px;">Editar</button>
+                <button onclick="handleDel(${idx})" style="background:var(--danger); color:white; padding:5px 10px;">X</button></td></tr>`;
             }
-            
-            if(editId > -1) {
-                db[editId] = { nome, preco, peso, unid };
-            } else {
-                db.push({ nome, preco, peso, unid });
-            }
-            
-            localStorage.setItem('pitadaDataV7
+        });
+
+        // Dropdown calculadora
+        const drop = document.getElementById('rec-drop');
+        drop.innerHTML = '<option value="">-- Selecione um ingrediente --</option>';
+        db.forEach((it, i) => {
+            drop.innerHTML += `<option value="${i}">${it.nome}</option>`;
+        });
+    };
+
+    window.handleDel = function(i) { if(confirm("Excluir?")) { db.splice(i, 1); localStorage.setItem('pitadaDataFinal', JSON.stringify(db)); renderIngs(); } };
+
+    window.startEdit = function(i) {
+        const it = db[i];
+        document.getElementById('edit-id').value = i;
+        document.getElementById('in-nome').value = it.nome;
+        document.getElementById('in-preco').value = "R$ " + it.preco.toFixed(2).replace(".",",");
+        document.getElementById('in-peso').value = it.peso;
+        document.getElementById('in-unid').value = it.unid;
+        document.getElementById('form-title').innerText = "📝 Editando: " + it.nome;
+        document.getElementById('btn-cancel').style.display = "block";
+    };
+
+    window.resetForm = function() {
+        document.getElementById('edit-id').value = "-1";
+        document.getElementById('in-nome').value = ""; document.getElementById('in-preco').value = "";
+        document.getElementById('in-peso').value = ""; document.getElementById('form-title').innerText = "Cadastrar/Editar";
+        document.getElementById('btn-cancel').style.display = "none";
+    };
+
+    window.forcarCarga = function() {
+        if(confirm("Isso carregará os 53 itens originais. Prosseguir?")) {
+            localStorage.setItem('pitadaDataFinal', JSON.stringify(baseFinal));
+            db = [...baseFinal]; renderIngs();
+        }
+    };
+
+    window.updateRecipeUnit = function() {
+        const idx = document.getElementById('rec-drop').value;
+        document.getElementById('label-u').innerText = idx !== "" ? "Unidade: " + db[idx].unid : "Unidade: ---";
+    };
+
+    window.addToRecipe = function() {
+        const idx = document.getElementById('rec-drop').value;
+        const rawQtd = document.getElementById('rec-qtd-usada').value;
+        const qtdUsada = parseNum(rawQtd);
+        if(idx === "" || qtdUsada <= 0) return;
+        
+        const it = db[idx];
+        let divisor = it.peso;
+        if((it.unid === "Kg" || it.unid === "L") && qtdUsada >= 10) divisor = it.peso * 1000;
+
+        const custo = (it.preco / divisor) * qtdUsada;
+        recipeItems.push({ nome: it.nome, qtd: rawQtd, unid: it.unid, custo: custo });
+        document.getElementById('rec-qtd-usada').value = ""; renderRecipe();
+    };
+
+    window.renderRecipe = function() {
+        const corpo = document.getElementById('rec-list');
+        corpo.innerHTML = ""; let total = 0;
+        recipeItems.forEach((it, i) => {
+            total += it.custo;
+            corpo.innerHTML += `<tr><td>${it.nome}</td><td>${it.qtd} ${it.unid}</td><td>R$ ${it.custo.toFixed(2)}</td><td onclick="recipeItems.splice(${i},1);renderRecipe()" style="color:red;cursor:pointer">✖</td></tr>`;
+        });
+        document.getElementById('rec-total').innerText = "R$ " + total.toFixed(2).replace(".",",");
+    };
+
+    window.onload = renderIngs;
+</script>
+</body>
+</html>
