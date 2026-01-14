@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pitada Doce - Importador</title>
+    <style>
+        :root { --rosa: #d63384; --fundo: #fcf4f7; --azul: #0d6efd; }
+        body { font-family: sans-serif; background: var(--fundo); padding: 10px; margin: 0; }
+        .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        h2 { color: var(--rosa); font-size: 1.1rem; margin-top: 0; border-bottom: 2px solid var(--fundo); padding-bottom: 8px; }
+        label { display: block; font-size: 0.75rem; margin-top: 10px; font-weight: bold; color: #555; }
+        input, select { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        button { background: var(--rosa); color: white; border: none; padding: 15px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 10px; }
+        .btn-import { background: var(--azul); margin-bottom: 15px; font-size: 0.9rem; }
+        table { width: 100%; font-size: 0.8rem; margin-top: 15px; border-collapse: collapse; }
+        th { text-align: left; border-bottom: 1px solid #ddd; padding: 8px 0; color: var(--rosa); }
+        td { padding: 10px 0; border-bottom: 1px solid #eee; }
+        .total-box { background: #333; padding: 15px; border-radius: 8px; margin-top: 15px; font-weight: bold; text-align: right; color: white; }
+    </style>
+</head>
+<body>
+
+    <div class="card" style="border: 2px dashed var(--azul);">
+        <button class="btn-import" onclick="importarPlanilha()">📥 CARREGAR 53 ITENS DA MINHA PLANILHA</button>
+        <p style="font-size: 0.7rem; color: #666; margin: 0; text-align: center;">Clique para cadastrar tudo automaticamente conforme a ficha técnica enviada.</p>
+    </div>
+
+    <div class="card">
+        <h2>📦 1. Insumo Individual</h2>
+        <input type="text" id="ing_nome" placeholder="Nome do Ingrediente">
+        <div style="display: flex; gap: 10px;">
+            <input type="text" id="ing_preco_mask" placeholder="R$ 0,00" oninput="formatarMoeda(this)" style="flex:1;">
+            <input type="number" id="ing_qtd" placeholder="Qtd (g/ml)" style="flex:1;">
+        </div>
+        <button onclick="salvarIngrediente()">💾 SALVAR NOVO</button>
+    </div>
+
+    <div class="card">
+        <h2>🎂 2. Montar Receita</h2>
+        <label>Escolher da Lista (Dropbox)</label>
+        <select id="drop_ingredientes">
+            <option value="">Carregue a planilha primeiro...</option>
+        </select>
+        
+        <label>Qtd na Receita (g ou ml)</label>
+        <input type="number" id="rec_qtd_usada" placeholder="Ex: 200">
+        
+        <button style="background: #6c757d;" onclick="addNaReceita()">+ ADICIONAR ITEM</button>
+
+        <table id="tab_receita">
+            <thead><tr><th>Item</th><th>Qtd</th><th>Subtotal</th></tr></thead>
+            <tbody></tbody>
+        </table>
+        
+        <div class="total-box" id="total_receita">Total: R$ 0,00</div>
+    </div>
+
+<script>
+    // DADOS EXTRAÍDOS DA SUA PLANILHA PELO ANALISTA
+    const dadosPlanilha = [{"nome": "Açúcar Cristal", "preco": 5.49, "qtd": 1000.0, "custoUnitario": 0.00549}, {"nome": "Açúcar Refinado", "preco": 4.99, "qtd": 1000.0, "custoUnitario": 0.00499}, {"nome": "Canela em pó", "preco": 4.99, "qtd": 30.0, "custoUnitario": 0.1663}, {"nome": "Chocolate ao leite Sicao", "preco": 164.99, "qtd": 2005.0, "custoUnitario": 0.0822}, {"nome": "Chocolate Branco Sicao", "preco": 209.99, "qtd": 2005.0, "custoUnitario": 0.1047}, {"nome": "Creme de Leite", "preco": 4.19, "qtd": 200.0, "custoUnitario": 0.0209}, {"nome": "Doce de Leite Frimesa", "preco": 10.89, "qtd": 400.0, "custoUnitario": 0.0272}, {"nome": "Farinha de Trigo", "preco": 6.99, "qtd": 1000.0, "custoUnitario": 0.0069}, {"nome": "Fermento em pó", "preco": 4.99, "qtd": 100.0, "custoUnitario": 0.0499}, {"nome": "Forminha n5", "preco": 3.99, "qtd": 100.0, "custoUnitario": 0.0399}, {"nome": "Nesquick", "preco": 22.99, "qtd": 380.0, "custoUnitario": 0.0605}, {"nome": "Leite condensado", "preco": 9.99, "qtd": 395.0, "custoUnitario": 0.0252}, {"nome": "Leite em Pó Ninho", "preco": 22.99, "qtd": 380.0, "custoUnitario": 0.0605}, {"nome": "Manteiga", "preco": 14.99, "qtd": 200.0, "custoUnitario": 0.0749}, {"nome": "Ovos", "preco": 25.0, "qtd": 30.0, "custoUnitario": 0.8333}, {"nome": "Paçoca", "preco": 7.19, "qtd": 10.0, "custoUnitario": 0.719}, {"nome": "Pasta de pistache Magna Crema", "preco": 135.0, "qtd": 250.0, "custoUnitario": 0.54}, {"nome": "Uva", "preco": 13.99, "qtd": 500.0, "custoUnitario": 0.0279}, {"nome": "Amendoim Torrado Granulado Vabene", "preco": 21.79, "qtd": 1050.0, "custoUnitario": 0.0207}, {"nome": "Chocolate em barra Nestlé", "preco": 8.48, "qtd": 80.0, "custoUnitario": 0.106}, {"nome": "Cacau em Pó 50% Genuíne", "preco": 39.99, "qtd": 1005.0, "custoUnitario": 0.0397}, {"nome": "Granulado Vermicelli Melken Ao Leite", "preco": 49.79, "qtd": 400.0, "custoUnitario": 0.1244}, {"nome": "Confeito de Chocolate Coloreti", "preco": 23.9, "qtd": 500.0, "custoUnitario": 0.0478}, {"nome": "Forminha 4 Pétalas", "preco": 2.59, "qtd": 50.0, "custoUnitario": 0.0518}, {"nome": "Embalagem Quadrada Brigadeiros 250ml", "preco": 56.89, "qtd": 50.0, "custoUnitario": 1.1378}, {"nome": "Coco ralado desidratado", "preco": 9.99, "qtd": 100.0, "custoUnitario": 0.0999}, {"nome": "Doce de Leite Portão de Cambuí", "preco": 30.79, "qtd": 1000.0, "custoUnitario": 0.0307}, {"nome": "Ninho cremoso", "preco": 20.53, "qtd": 670.0, "custoUnitario": 0.0306}, {"nome": "Ganache chocolate", "preco": 5.53, "qtd": 180.0, "custoUnitario": 0.0307}, {"nome": "Granulado Granulé Melken Ao Leite", "preco": 45.99, "qtd": 400.0, "custoUnitario": 0.1149}, {"nome": "Nutella", "preco": 190.0, "qtd": 3000.0, "custoUnitario": 0.0633}, {"nome": "Doce de Leite Cremoso", "preco": 13.9, "qtd": 360.0, "custoUnitario": 0.0386}];
+
+    let db = JSON.parse(localStorage.getItem('pitadaDB')) || [];
+    let receitaAtual = [];
+
+    function importarPlanilha() {
+        if(confirm("Isso vai carregar os itens da planilha Pitada Doce. Continuar?")) {
+            localStorage.setItem('pitadaDB', JSON.stringify(dadosPlanilha));
+            db = dadosPlanilha;
+            atualizarDropdown();
+            alert("✅ " + dadosPlanilha.length + " itens carregados com sucesso!");
+        }
+    }
+
+    function formatarMoeda(input) {
+        let valor = input.value.replace(/\D/g, "");
+        valor = (valor / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+        input.value = valor;
+    }
+
+    function parseMoeda(valorStr) {
+        return parseFloat(valorStr.replace(/[R$\s.]/g, "").replace(",", ".")) || 0;
+    }
+
+    function salvarIngrediente() {
+        const nome = document.getElementById('ing_nome').value.trim();
+        const preco = parseMoeda(document.getElementById('ing_preco_mask').value);
+        const qtd = parseFloat(document.getElementById('ing_qtd').value);
+        if(!nome || preco <= 0 || !qtd) return alert("Preencha tudo!");
+        
+        const custoUnitario = preco / qtd;
+        const index = db.findIndex(i => i.nome.toLowerCase() === nome.toLowerCase());
+        if (index > -1) db[index] = { nome, preco, qtd, custoUnitario };
+        else db.push({ nome, preco, qtd, custoUnitario });
+
+        localStorage.setItem('pitadaDB', JSON.stringify(db));
+        atualizarDropdown();
+        alert("Salvo!");
+    }
+
+    function atualizarDropdown() {
+        const drop = document.getElementById('drop_ingredientes');
+        drop.innerHTML = '<option value="">-- Selecione um item --</option>';
+        db.sort((a,b) => a.nome.localeCompare(b.nome)).forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item.nome;
+            opt.text = `${item.nome} (${item.preco.toLocaleString('pt-BR', {style:'currency', currency:'BRL'})})`;
+            drop.appendChild(opt);
+        });
+    }
+
+    function addNaReceita() {
+        const nome = document.getElementById('drop_ingredientes').value;
+        const qtdUsada = parseFloat(document.getElementById('rec_qtd_usada').value);
+        if(!nome || !qtdUsada) return;
+        const subtotal = db.find(i => i.nome === nome).custoUnitario * qtdUsada;
+        receitaAtual.push({ nome, qtd: qtdUsada, custo: subtotal });
+        renderizarTabelaReceita();
+    }
+
+    function renderizarTabelaReceita() {
+        const corpo = document.querySelector('#tab_receita tbody');
+        corpo.innerHTML = "";
+        let total = 0;
+        receitaAtual.forEach(item => {
+            total += item.custo;
+            corpo.innerHTML += `<tr><td>${item.nome}</td><td>${item.qtd}g</td><td>${item.custo.toLocaleString('pt-BR', {style:'currency', currency:'BRL'})}</td></tr>`;
+        });
+        document.getElementById('total_receita').innerText = `Total: ${total.toLocaleString('pt-BR', {style:'currency', currency:'BRL'})}`;
+    }
+
+    atualizarDropdown();
+</script>
+</body>
+</html>
