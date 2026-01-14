@@ -3,38 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pitada Doce - Sistema Bakery v6</title>
+    <title>Pitada Doce - Sistema Bakery v7.3</title>
     <style>
         :root { --rosa: #d63384; --dark: #2c3e50; --fundo: #f8f9fa; --danger: #e74c3c; --warning: #f1c40f; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; display: flex; height: 100vh; background: var(--fundo); }
-        #sidebar { width: 220px; background: var(--dark); color: white; display: flex; flex-direction: column; flex-shrink: 0; }
-        .logo { padding: 25px; text-align: center; font-weight: bold; background: var(--rosa); font-size: 1.2rem; }
-        .nav-item { padding: 15px 25px; cursor: pointer; border-bottom: 1px solid #3e4f5f; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; display: flex; height: 100vh; background: var(--fundo); color: #333; }
+        #sidebar { width: 220px; background: var(--dark); color: white; display: flex; flex-direction: column; flex-shrink: 0; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
+        .logo { padding: 25px; text-align: center; font-weight: bold; background: var(--rosa); font-size: 1.1rem; letter-spacing: 1px; }
+        .nav-item { padding: 15px 25px; cursor: pointer; border-bottom: 1px solid #3e4f5f; transition: 0.3s; font-size: 0.9rem; }
         .nav-item:hover, .nav-item.active { background: #3e4f5f; border-left: 5px solid var(--rosa); }
         #content { flex: 1; padding: 30px; overflow-y: auto; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #eee; }
-        h2 { color: var(--dark); margin-top: 0; font-size: 1.3rem; border-bottom: 2px solid var(--fundo); padding-bottom: 10px; }
-        .form-row { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; align-items: flex-end; }
-        label { display: block; font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; color: #666; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
-        button { cursor: pointer; border: none; border-radius: 8px; font-weight: bold; padding: 12px 20px; }
-        .btn-add { background: var(--rosa); color: white; width: 100%; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { text-align: left; padding: 12px; background: #f1f3f5; color: #495057; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #eee; }
+        h2 { color: var(--dark); margin-top: 0; font-size: 1.2rem; border-bottom: 2px solid var(--fundo); padding-bottom: 10px; margin-bottom: 20px; }
+        .form-row { display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; align-items: flex-end; }
+        label { display: block; font-size: 0.75rem; font-weight: bold; margin-bottom: 6px; color: #777; text-transform: uppercase; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 0.95rem; }
+        button { cursor: pointer; border: none; border-radius: 8px; font-weight: bold; padding: 12px 20px; transition: 0.2s; }
+        .btn-add { background: var(--rosa); color: white; width: 100%; font-size: 1rem; }
+        .btn-edit { background: var(--warning); color: #000; padding: 6px 12px; font-size: 0.75rem; }
+        .btn-del { background: var(--danger); color: white; padding: 6px 12px; font-size: 0.75rem; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 12px; background: #f1f3f5; color: #495057; font-size: 0.8rem; text-transform: uppercase; }
         td { padding: 12px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
-        .pagination { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 20px; }
-        .total-box { background: var(--dark); color: white; padding: 25px; border-radius: 12px; text-align: right; margin-top: 20px; font-size: 1.2rem; }
-        .total-box b { color: var(--rosa); font-size: 1.8rem; }
+        .pagination { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 25px; }
+        .page-btn { background: white; border: 1px solid #ddd; padding: 8px 16px; border-radius: 6px; }
+        .page-btn:disabled { opacity: 0.3; }
+        .total-box { background: var(--dark); color: white; padding: 25px; border-radius: 12px; text-align: right; margin-top: 25px; }
+        .total-box b { color: var(--rosa); font-size: 2rem; margin-left: 10px; }
     </style>
 </head>
 <body>
 
 <div id="sidebar">
     <div class="logo">Pitada Doce 🧁</div>
-    <div class="nav-item active" onclick="switchTab('ingredientes', this)">📦 Ingredientes</div>
-    <div class="nav-item" onclick="switchTab('receitas', this)">🎂 Receitas</div>
+    <div class="nav-item active" id="btn-tab-ing" onclick="switchTab('ingredientes')">📦 Insumos / Estoque</div>
+    <div class="nav-item" id="btn-tab-rec" onclick="switchTab('receitas')">🎂 Montar Receita</div>
 </div>
 
 <div id="content">
@@ -43,20 +47,10 @@
             <h2 id="form-title">Gerenciar Insumos</h2>
             <input type="hidden" id="edit-id" value="-1">
             <div class="form-row">
-                <div style="flex: 2;">
-                    <label>Nome</label>
-                    <input type="text" id="in-nome">
-                </div>
-                <div style="flex: 1.2;">
-                    <label>Preço Pago</label>
-                    <input type="text" id="in-preco" oninput="maskBRL(this)">
-                </div>
-                <div style="flex: 0.8;">
-                    <label>Peso/Qtd</label>
-                    <input type="number" id="in-peso" step="any">
-                </div>
-                <div style="flex: 0.8;">
-                    <label>Unidade</label>
+                <div style="flex: 2;"><label>Nome</label><input type="text" id="in-nome"></div>
+                <div style="flex: 1.2;"><label>Preço</label><input type="text" id="in-preco" oninput="maskBRL(this)"></div>
+                <div style="flex: 0.8;"><label>Peso/Qtd</label><input type="text" id="in-peso"></div>
+                <div style="flex: 0.8;"><label>Unidade</label>
                     <select id="in-unid">
                         <option value="g">g</option><option value="Kg">Kg</option>
                         <option value="ML">ML</option><option value="L">L</option>
@@ -67,20 +61,15 @@
             <button class="btn-add" onclick="handleSave()">💾 SALVAR NO BANCO DE DADOS</button>
             <button id="btn-cancel" style="display:none; width:100%; margin-top:10px; background:#ccc;" onclick="resetForm()">Cancelar</button>
         </div>
-
         <div class="card">
-            <input type="text" id="search-input" placeholder="🔎 Pesquisar ingrediente..." oninput="currentPage=1; renderIngs();" style="margin-bottom:15px">
-            <table>
-                <thead><tr><th>Nome</th><th>Preço</th><th>Medida</th><th>Ações</th></tr></thead>
-                <tbody id="lista-corpo"></tbody>
-            </table>
+            <input type="text" id="search-input" placeholder="🔎 Pesquisar ingrediente..." oninput="currentPage=1; renderIngs();">
+            <table><thead><tr><th>Nome</th><th>Preço</th><th>Medida</th><th>Ações</th></tr></thead><tbody id="lista-corpo"></tbody></table>
             <div class="pagination">
-                <button onclick="changePage(-1)">◀ Anterior</button>
-                <span id="pageInfo">Página 1</span>
-                <button onclick="changePage(1)">Próximo ▶</button>
+                <button class="page-btn" id="prevPage" onclick="changePage(-1)">Anterior</button>
+                <span id="pageInfo"></span>
+                <button class="page-btn" id="nextPage" onclick="changePage(1)">Próximo</button>
             </div>
-            <hr style="margin-top:20px; opacity:0.2">
-            <button onclick="forcarCarga()" style="background:#0d6efd; color:white; width:100%; font-size:0.8rem">🔄 FORÇAR CARREGAMENTO DA PLANILHA (Use se a lista sumir)</button>
+            <button onclick="forcarCarga()" style="background:none; color:#0d6efd; width:100%; font-size:0.7rem; margin-top:30px; border: 1px dashed #0d6efd; padding: 10px;">🔄 RESETAR PARA LISTA DA PLANILHA</button>
         </div>
     </div>
 
@@ -88,44 +77,32 @@
         <div class="card">
             <h2>Calculadora de Receita</h2>
             <div class="form-row">
-                <div style="flex: 2;">
-                    <label>Ingrediente</label>
-                    <select id="rec-drop" onchange="updateRecipeUnit()"></select>
-                </div>
-                <div style="flex: 1;">
-                    <label>Qtd Usada (<span id="unit-label">---</span>)</label>
-                    <input type="number" id="rec-qtd-usada">
-                </div>
-                <div style="flex: 0.5;">
-                    <button style="background: var(--dark); color:white; width:100%" onclick="addToRecipe()">+ ADD</button>
-                </div>
+                <div style="flex: 2.5;"><label>Ingrediente</label><select id="rec-drop" onchange="updateRecipeUnit()"></select></div>
+                <div style="flex: 1;"><label>Quantidade (<span id="unit-label" style="color:var(--rosa)">---</span>)</label><input type="text" id="rec-qtd-usada" placeholder="Ex: 0,5 ou 250"></div>
+                <div style="flex: 0.5;"><button style="background: var(--dark); color:white; width:100%" onclick="addToRecipe()">+ ADD</button></div>
             </div>
-            <table>
-                <thead><tr><th>Item</th><th>Uso</th><th>Custo</th><th></th></tr></thead>
-                <tbody id="rec-list"></tbody>
-            </table>
+            <table><thead><tr><th>Item</th><th>Uso</th><th>Subtotal</th><th></th></tr></thead><tbody id="rec-list"></tbody></table>
             <div class="total-box">Custo Total: <b id="rec-total">R$ 0,00</b></div>
-            <button onclick="recipeItems=[]; renderRecipe();" style="background:none; color:#999; font-size:0.8rem">LIMPAR TUDO</button>
         </div>
     </div>
 </div>
 
 <script>
-    const planilhaOriginal = [{"nome":"Açúcar Cristal","preco":5.49,"peso":1,"unid":"Kg"},{"nome":"Chocolate Melken Meio Amargo","preco":159.99,"peso":2.005,"unid":"Kg"},{"nome":"Leite condensado","preco":9.99,"peso":395,"unid":"g"},{"nome":"Manteiga","preco":14.99,"peso":200,"unid":"g"},{"nome":"Ovos","preco":25.00,"peso":30,"unid":"un"},{"nome":"Farinha de Trigo","preco":6.99,"peso":1,"unid":"Kg"},{"nome":"Nutella","preco":190.00,"peso":3,"unid":"Kg"},{"nome":"Cacau em Pó 100%","preco":44.99,"peso":500,"unid":"g"},{"nome":"Colher descartavel","preco":29.90,"peso":50,"unid":"un"},{"nome":"Creme de Leite","preco":4.19,"peso":200,"unid":"g"},{"nome":"Uva","preco":13.99,"peso":500,"unid":"g"},{"nome":"Pistache cremoso","preco":65.30,"peso":585,"unid":"g"}];
+    const baseFinal = [{"nome":"Açúcar Cristal","preco":5.49,"peso":1.0,"unid":"Kg"},{"nome":"Açúcar Refinado","preco":4.99,"peso":1.0,"unid":"Kg"},{"nome":"Canela em pó","preco":4.99,"peso":30.0,"unid":"g"},{"nome":"Chocolate ao leite Sicao","preco":164.99,"peso":2.005,"unid":"Kg"},{"nome":"Chocolate Branco Sicao","preco":209.99,"peso":2.005,"unid":"Kg"},{"nome":"Creme de Leite","preco":4.19,"peso":200.0,"unid":"g"},{"nome":"Doce de Leite Frimesa","preco":10.89,"peso":400.0,"unid":"g"},{"nome":"Farinha de Trigo","preco":6.99,"peso":1.0,"unid":"Kg"},{"nome":"Fermento em pó","preco":4.99,"peso":100.0,"unid":"g"},{"nome":"Forminha n5","preco":3.99,"peso":100.0,"unid":"un"},{"nome":"Nesquick","preco":22.99,"peso":380.0,"unid":"g"},{"nome":"Leite condensado","preco":9.99,"peso":395.0,"unid":"g"},{"nome":"Leite em Pó Ninho","preco":22.99,"peso":380.0,"unid":"g"},{"nome":"Manteiga","preco":14.99,"peso":200.0,"unid":"g"},{"nome":"Ovos","preco":25.0,"peso":30.0,"unid":"un"},{"nome":"Paçoca","preco":7.19,"peso":10.0,"unid":"un"},{"nome":"Pasta de pistache Magna Crema","preco":135.0,"peso":250.0,"unid":"g"},{"nome":"Uva","preco":13.99,"peso":500.0,"unid":"g"},{"nome":"Amendoim Vabene","preco":21.79,"peso":1.05,"unid":"Kg"},{"nome":"Chocolate Nestlé","preco":8.48,"peso":80.0,"unid":"g"},{"nome":"Cacau 50% Genuíne","preco":39.99,"peso":1.005,"unid":"Kg"},{"nome":"Granulado Vermicelli Melken","preco":49.79,"peso":400.0,"unid":"g"},{"nome":"Coloreti","preco":23.9,"peso":500.0,"unid":"g"},{"nome":"Forminha 4 Pétalas","preco":2.59,"peso":50.0,"unid":"un"},{"nome":"Embalagem Quadrada 250ml","preco":56.89,"peso":50.0,"unid":"un"},{"nome":"Coco desidratado","preco":9.99,"peso":100.0,"unid":"g"},{"nome":"Massa de beijinho","preco":0.2,"peso":4.0,"unid":"g"},{"nome":"Coco ralado menina","preco":4.99,"peso":100.0,"unid":"g"},{"nome":"Forminha n4 Regina","preco":3.39,"peso":100.0,"unid":"un"},{"nome":"Doce de Leite Portão","preco":30.79,"peso":1.0,"unid":"Kg"},{"nome":"Ninho cremoso","preco":20.53,"peso":670.0,"unid":"g"},{"nome":"Ganache chocolate","preco":5.53,"peso":180.0,"unid":"g"},{"nome":"Granulado Granulé","preco":45.99,"peso":400.0,"unid":"g"},{"nome":"Massa Casadinho Leite","preco":21.13,"peso":550.0,"unid":"g"},{"nome":"Massa Casadinho Ninho","preco":18.14,"peso":470.0,"unid":"g"},{"nome":"Açucar Mascavo","preco":10.99,"peso":1.0,"unid":"Kg"},{"nome":"Sal","preco":4.99,"peso":1.0,"unid":"Kg"},{"nome":"Bicarbonato","preco":3.69,"peso":250.0,"unid":"g"},{"nome":"Cacau 100% Genuíne","preco":44.99,"peso":500.0,"unid":"g"},{"nome":"Choc. Meio Amargo Melken","preco":159.99,"peso":2.005,"unid":"Kg"},{"nome":"Choc. Branco Melken","preco":163.99,"peso":2.005,"unid":"Kg"},{"nome":"Fini Camping","preco":8.39,"peso":250.0,"unid":"g"},{"nome":"Choc. Ao Leite Melken","preco":162.99,"peso":2.005,"unid":"Kg"},{"nome":"Corante Vermelho","preco":4.99,"peso":25.0,"unid":"g"},{"nome":"Essencia Baunilha","preco":13.99,"peso":960.0,"unid":"un"},{"nome":"Negresco 1kg","preco":50.99,"peso":1.0,"unid":"Kg"},{"nome":"Nutella","preco":190.0,"peso":3.0,"unid":"Kg"},{"nome":"Confeito Mavalério","preco":4.99,"peso":150.0,"unid":"g"},{"nome":"Pistache cremoso","preco":65.3,"peso":585.0,"unid":"g"},{"nome":"Doce de Leite Cremoso","preco":13.9,"peso":360.0,"unid":"g"},{"nome":"Brownie 5x5","preco":2.32,"peso":35.0,"unid":"g"},{"nome":"Colher descartavel","preco":29.9,"peso":50.0,"unid":"un"},{"nome":"Brigadeiro Coxinha","preco":33.7,"peso":560.0,"unid":"g"}];
 
-    let db = JSON.parse(localStorage.getItem('pitadaDataV6')) || planilhaOriginal;
+    let db = JSON.parse(localStorage.getItem('pitadaDataV7.3')) || baseFinal;
     let recipeItems = [];
     let currentPage = 1;
     const itemsPerPage = 10;
 
-    function switchTab(tabId, el) {
+    function normalize(s) { return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase(); }
+    function switchTab(tab) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        document.getElementById('tab-' + tabId).classList.add('active');
-        el.classList.add('active');
+        document.getElementById('tab-' + tab).classList.add('active');
+        document.getElementById('btn-tab-' + (tab.startsWith('ing') ? 'ing' : 'rec')).classList.add('active');
         renderIngs();
     }
-
     function maskBRL(i) {
         let v = i.value.replace(/\D/g,'');
         v = (v/100).toFixed(2).replace(".", ",");
@@ -133,73 +110,51 @@
         v = v.replace(/(\d)(\d{3}),/g, "$1.$2,");
         i.value = "R$ " + v;
     }
-
-    function parseBRL(v) {
-        return parseFloat(v.replace(/[R$\s.]/g, "").replace(",", ".")) || 0;
-    }
+    function parseNum(v) { if(!v) return 0; return parseFloat(v.toString().replace(",", ".")) || 0; }
+    function parseBRL(v) { return parseFloat(v.replace(/[R$\s.]/g, "").replace(",", ".")) || 0; }
 
     function handleSave() {
-        const nome = document.getElementById('in-nome').value;
+        const nome = document.getElementById('in-nome').value.trim();
         const preco = parseBRL(document.getElementById('in-preco').value);
-        const peso = parseFloat(document.getElementById('in-peso').value);
+        const peso = parseNum(document.getElementById('in-peso').value);
         const unid = document.getElementById('in-unid').value;
         const editId = parseInt(document.getElementById('edit-id').value);
-
-        if(!nome || preco <= 0 || !peso) return alert("Preencha os campos!");
-
-        if(editId > -1) {
-            if(confirm("Confirmar edição?")) db[editId] = { nome, preco, peso, unid };
-        } else {
-            db.push({ nome, preco, peso, unid });
-        }
-        localStorage.setItem('pitadaDataV6', JSON.stringify(db));
-        resetForm();
-        renderIngs();
+        if(!nome || preco <= 0 || peso <= 0) return alert("Preencha tudo!");
+        if(editId > -1) db[editId] = { nome, preco, peso, unid };
+        else db.push({ nome, preco, peso, unid });
+        localStorage.setItem('pitadaDataV7.3', JSON.stringify(db));
+        resetForm(); renderIngs();
     }
 
     function renderIngs() {
-        const search = document.getElementById('search-input').value.toLowerCase();
-        const filtered = db.filter(i => i.nome.toLowerCase().includes(search)).sort((a,b) => a.nome.localeCompare(b.nome));
-        
+        const search = normalize(document.getElementById('search-input').value);
+        const filtered = db.filter(i => normalize(i.nome).includes(search)).sort((a,b) => a.nome.localeCompare(b.nome));
         const totalPages = Math.ceil(filtered.length / itemsPerPage) || 1;
+        if(currentPage > totalPages) currentPage = totalPages;
         const start = (currentPage - 1) * itemsPerPage;
         const pageData = filtered.slice(start, start + itemsPerPage);
-
         const corpo = document.getElementById('lista-corpo');
         corpo.innerHTML = "";
         pageData.forEach(item => {
             const realIdx = db.findIndex(i => i.nome === item.nome);
-            corpo.innerHTML += `<tr>
-                <td><b>${item.nome}</b></td>
-                <td>R$ ${item.preco.toFixed(2)}</td>
-                <td>${item.peso}${item.unid}</td>
-                <td>
-                    <button class="btn-edit" onclick="startEdit(${realIdx})">Editar</button>
-                    <button class="btn-del" style="background:var(--danger);color:white;padding:6px" onclick="handleDel(${realIdx})">X</button>
-                </td>
-            </tr>`;
+            corpo.innerHTML += `<tr><td><b>${item.nome}</b></td><td>R$ ${item.preco.toFixed(2)}</td><td>${item.peso}${item.unid}</td>
+                <td><button class="btn-edit" onclick="startEdit(${realIdx})">Editar</button>
+                <button class="btn-del" onclick="handleDel(${realIdx})" style="background:var(--danger);color:white;padding:6px">X</button></td></tr>`;
         });
-
         document.getElementById('pageInfo').innerText = `Página ${currentPage} de ${totalPages}`;
-        
-        // Dropdown Receita
+        document.getElementById('prevPage').disabled = (currentPage <= 1);
+        document.getElementById('nextPage').disabled = (currentPage >= totalPages);
         const drop = document.getElementById('rec-drop');
+        const lastVal = drop.value;
         drop.innerHTML = '<option value="">-- Selecione --</option>';
         db.sort((a,b) => a.nome.localeCompare(b.nome)).forEach(item => {
             drop.innerHTML += `<option value="${db.indexOf(item)}">${item.nome}</option>`;
         });
+        drop.value = lastVal;
     }
 
     function changePage(dir) { currentPage += dir; renderIngs(); }
-
-    function handleDel(idx) {
-        if(confirm("Excluir " + db[idx].nome + "?")) {
-            db.splice(idx, 1);
-            localStorage.setItem('pitadaDataV6', JSON.stringify(db));
-            renderIngs();
-        }
-    }
-
+    function handleDel(idx) { if(confirm("Apagar?")) { db.splice(idx, 1); localStorage.setItem('pitadaDataV7.3', JSON.stringify(db)); renderIngs(); } }
     function startEdit(idx) {
         const it = db[idx];
         document.getElementById('edit-id').value = idx;
@@ -210,53 +165,11 @@
         document.getElementById('form-title').innerText = "📝 Editando: " + it.nome;
         document.getElementById('btn-cancel').style.display = "block";
     }
-
     function resetForm() {
         document.getElementById('edit-id').value = "-1";
-        document.getElementById('in-nome').value = "";
-        document.getElementById('in-preco').value = "";
-        document.getElementById('in-peso').value = "";
-        document.getElementById('form-title').innerText = "Gerenciar Insumos";
+        document.getElementById('in-nome').value = ""; document.getElementById('in-preco').value = "";
+        document.getElementById('in-peso').value = ""; document.getElementById('form-title').innerText = "Gerenciar Insumos";
         document.getElementById('btn-cancel').style.display = "none";
     }
 
-    function forcarCarga() {
-        if(confirm("Isso irá resetar sua lista para os ingredientes da planilha. Deseja continuar?")) {
-            localStorage.setItem('pitadaDataV6', JSON.stringify(planilhaOriginal));
-            db = planilhaOriginal;
-            renderIngs();
-        }
-    }
-
-    function updateRecipeUnit() {
-        const idx = document.getElementById('rec-drop').value;
-        document.getElementById('unit-label').innerText = idx !== "" ? db[idx].unid : "---";
-    }
-
-    function addToRecipe() {
-        const idx = document.getElementById('rec-drop').value;
-        const qtd = parseFloat(document.getElementById('rec-qtd-usada').value);
-        if(idx === "" || !qtd) return;
-        const it = db[idx];
-        let divisor = it.peso;
-        if(it.unid === "Kg" || it.unid === "L") divisor = it.peso * 1000;
-        const custo = (it.preco / divisor) * qtd;
-        recipeItems.push({ nome: it.nome, qtd, unid: it.unid, custo });
-        renderRecipe();
-    }
-
-    function renderRecipe() {
-        const corpo = document.getElementById('rec-list');
-        corpo.innerHTML = "";
-        let total = 0;
-        recipeItems.forEach((it, i) => {
-            total += it.custo;
-            corpo.innerHTML += `<tr><td>${it.nome}</td><td>${it.qtd}${it.unid}</td><td>R$ ${it.custo.toFixed(2)}</td><td onclick="recipeItems.splice(${i},1);renderRecipe()" style="color:red;cursor:pointer">✖</td></tr>`;
-        });
-        document.getElementById('rec-total').innerText = "R$ " + total.toFixed(2);
-    }
-
-    renderIngs();
-</script>
-</body>
-</html>
+    function forcarCarga() { if(confirm("Resetar?")) { localStorage.setItem('pitadaDataV7.3', JSON.
